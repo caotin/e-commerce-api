@@ -10,7 +10,7 @@ services:
       - "3306:3306"
 
   app:
-    image: duydl12/ecommerce-api-app:latest
+    image: duydl12/e-commerce-api-app:latest
     depends_on:
       - mysql
     restart: always
