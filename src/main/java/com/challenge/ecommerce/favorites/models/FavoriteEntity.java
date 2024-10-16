@@ -1,18 +1,15 @@
-package com.challenge.ecommerce.reviews.models;
+package com.challenge.ecommerce.favorites.models;
 
 import com.challenge.ecommerce.products.models.ProductEntity;
 import com.challenge.ecommerce.users.models.UserEntity;
 import com.challenge.ecommerce.utils.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.mysql.cj.protocol.ColumnDefinition;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity(name = "reviews")
+@Entity(name = "favorites")
 @Table
 @Getter
 @Setter
@@ -21,14 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class ReviewEntity extends BaseEntity {
-    @Column(columnDefinition = "TEXT")
-    String content;
-
-    @Min(1)
-    @Max(5)
-    Integer rating;
-
+public class FavoriteEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     @JsonBackReference
