@@ -44,7 +44,7 @@ public class UserEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "user" ,fetch = FetchType.LAZY)
     @JsonManagedReference
-    Set<DeliveryAddressEntity> deliveryAddress = new HashSet<>();
+    Set<DeliveryAddressEntity> deliveryAddresses = new HashSet<>();
 
     @OneToMany(mappedBy = "user" ,fetch = FetchType.LAZY)
     @JsonManagedReference
