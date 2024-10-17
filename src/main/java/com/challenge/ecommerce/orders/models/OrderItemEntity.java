@@ -1,18 +1,16 @@
-package com.challenge.ecommerce.reviews.models;
+package com.challenge.ecommerce.orders.models;
 
-import com.challenge.ecommerce.products.models.ProductEntity;
-import com.challenge.ecommerce.users.models.UserEntity;
+import com.challenge.ecommerce.products.models.VariantEntity;
 import com.challenge.ecommerce.utils.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.mysql.cj.protocol.ColumnDefinition;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Entity(name = "reviews")
+import java.math.BigDecimal;
+
+@Entity(name = "order_items")
 @Table
 @Getter
 @Setter
@@ -21,21 +19,20 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class ReviewEntity extends BaseEntity {
-    @Column(columnDefinition = "TEXT")
-    String content;
+public class OrderItemEntity extends BaseEntity {
+    @Column(nullable = false)
+    Integer quantity;
 
-    @Min(1)
-    @Max(5)
-    Integer rating;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @JsonBackReference
-    UserEntity user;
+    @Column(nullable = false)
+    BigDecimal item_total_price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     @JsonBackReference
-    ProductEntity product;
+    OrderEntity order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    @JsonBackReference
+    VariantEntity variant;
 }
