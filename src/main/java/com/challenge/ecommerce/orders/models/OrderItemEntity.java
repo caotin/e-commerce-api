@@ -8,6 +8,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
+
 @Entity(name = "order_items")
 @Table
 @Getter
@@ -22,7 +24,7 @@ public class OrderItemEntity extends BaseEntity {
     Integer quantity;
 
     @Column(nullable = false)
-    Double item_total_price;
+    BigDecimal item_total_price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

@@ -20,7 +20,7 @@ import java.util.UUID;
 public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
+    String id;
 
     @CreatedDate
     @Column(nullable = false)

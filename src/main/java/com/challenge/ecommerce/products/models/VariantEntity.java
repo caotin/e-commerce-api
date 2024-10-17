@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class VariantEntity extends BaseEntity {
     Integer stock_quantity;
 
     @Column(nullable = false)
-    Double price;
+    BigDecimal price;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

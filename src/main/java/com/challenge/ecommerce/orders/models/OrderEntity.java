@@ -13,6 +13,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class OrderEntity extends BaseEntity {
     OrderStatus status;
 
     @Column(nullable = false)
-    Double total_price;
+    BigDecimal total_price;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
