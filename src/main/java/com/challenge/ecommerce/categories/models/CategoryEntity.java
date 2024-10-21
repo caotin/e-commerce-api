@@ -24,7 +24,7 @@ public class CategoryEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(100)")
     String name;
 
-    @OneToMany(mappedBy = "category" ,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @JsonManagedReference
     Set<ProductEntity> products = new HashSet<>();
 }
