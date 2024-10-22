@@ -111,7 +111,7 @@ public class AuthenticationService implements IAuthenticationService {
       }
       return getAuthenticationResponseApiResponse(user);
     } catch (ParseException e) {
-      throw new RuntimeException(e);
+      throw new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_FAILED);
     }
   }
 
@@ -178,7 +178,7 @@ public class AuthenticationService implements IAuthenticationService {
       SignedJWT signedJWT = SignedJWT.parse(token);
       Date expirationDate = signedJWT.getJWTClaimsSet().getExpirationTime();
       var verify = signedJWT.verify(verifier);
-      if (!expirationDate.after(new Date()) || verify) {
+      if (!expirationDate.after(new Date()) || !verify) {
         throw new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_INVALID);
       }
       return signedJWT;
