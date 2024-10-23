@@ -80,7 +80,6 @@ public class AuthenticationService implements IAuthenticationService {
     user.setRefresh_token(null);
     userRepository.save(user);
     return ApiResponse.<Void>builder()
-        .code(ResponseStatus.SUCCESS.getCode())
         .message(ResponseStatus.SUCCESS.getMessage())
         .build();
   }
@@ -128,7 +127,6 @@ public class AuthenticationService implements IAuthenticationService {
             .refreshToken(refreshToken)
             .build();
     return ApiResponse.<AuthenticationResponse>builder()
-        .code(ResponseStatus.SUCCESS.getCode())
         .message(ResponseStatus.SUCCESS.getMessage())
         .result(authenticationResponse)
         .build();
