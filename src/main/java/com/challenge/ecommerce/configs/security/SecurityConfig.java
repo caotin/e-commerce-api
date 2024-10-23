@@ -1,10 +1,12 @@
 package com.challenge.ecommerce.configs.security;
 
+import com.challenge.ecommerce.utils.enums.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,10 +25,23 @@ public class SecurityConfig {
   CustomJwtDecoder customJwtDecoder;
   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   RestAccessDeniedHandler restAccessDeniedHandler;
+  String[] PUBLIC_POST_ENDPOINT = {"/api/auth/signup", "/api/auth/login"};
+  String[] PRIVATE_PUT_ENDPOINT = {"/api/users/me"};
+  String[] PRIVATE_GET_ENDPOINT = {"/api/users/me"};
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(request -> request.anyRequest().authenticated());
+    http.authorizeHttpRequests(
+        request ->
+            request
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT)
+                .permitAll()
+                .requestMatchers(HttpMethod.PUT, PRIVATE_PUT_ENDPOINT)
+                .hasAnyAuthority(Role.USER.name())
+                .requestMatchers(HttpMethod.GET, PRIVATE_GET_ENDPOINT)
+                .hasAnyAuthority(Role.USER.name())
+                .anyRequest()
+                .authenticated());
     http.oauth2ResourceServer(
             oauth2 ->
                 oauth2

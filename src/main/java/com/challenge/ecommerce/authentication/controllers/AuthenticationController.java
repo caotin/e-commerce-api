@@ -4,6 +4,8 @@ import com.challenge.ecommerce.authentication.controllers.dtos.AuthenticationReq
 import com.challenge.ecommerce.authentication.controllers.dtos.AuthenticationResponse;
 import com.challenge.ecommerce.authentication.controllers.dtos.RefreshRequest;
 import com.challenge.ecommerce.authentication.services.IAuthenticationService;
+import com.challenge.ecommerce.users.controllers.dtos.UserCreatRequest;
+import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {
   IAuthenticationService authenticationService;
+  IUserServices userServices;
 
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<AuthenticationResponse>> login(
@@ -30,8 +33,10 @@ public class AuthenticationController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponse<Void>> register() {
-    return ResponseEntity.noContent().build();
+  public ResponseEntity<ApiResponse<Void>> register(
+      @RequestBody @Valid UserCreatRequest userCreatRequest) {
+    var resp = userServices.signUp(userCreatRequest);
+    return ResponseEntity.ok().body(resp);
   }
 
   @PostMapping("/logout")
