@@ -16,8 +16,8 @@ public interface ICategoryMapper {
   CategoryResponse categoryEntityToDto(CategoryEntity entity);
 
   @Mapping(
-      target = "name",
-      source = "name",
+      target = "category_parent_name",
+      source = "category_parent_name",
       nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
   CategoryEntity updateCategoryFromDto(
       CategoryUpdateDto request, @MappingTarget CategoryEntity oldEntity);

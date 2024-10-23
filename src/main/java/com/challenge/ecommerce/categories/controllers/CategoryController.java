@@ -49,7 +49,7 @@ public class CategoryController {
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SiZE) int size,
       @RequestParam(required = false) String sortParam) {
     Sort sort = DEFAULT_FILTER_SORT;
-    if (sortParam != null && sortParam.equals("ASC")) {
+    if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
     Pageable pageable = PageRequest.of(page, size, sort);
@@ -124,7 +124,7 @@ public class CategoryController {
       @RequestParam(required = false) String sortParam,
       @PathVariable("categoryParentName") String categoryParentName) {
     Sort sort = DEFAULT_FILTER_SORT;
-    if (sortParam != null && sortParam.equals("ASC")) {
+    if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
     Pageable pageable = PageRequest.of(page, size, sort);

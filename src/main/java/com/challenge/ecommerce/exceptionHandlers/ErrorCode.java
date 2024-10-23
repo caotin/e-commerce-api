@@ -15,12 +15,14 @@ public enum ErrorCode {
   PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST),
   REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED),
   CATEGORY_EXISTED("Category name already existed", HttpStatus.BAD_REQUEST),
-  CATEGORY_NOT_FOUND("Category not found !", HttpStatus.NOT_FOUND),
-  SET_IMAGE_NOT_SUCCESS("Error while uploading file!", HttpStatus.BAD_REQUEST),
-  CATEGORY_IMAGE_NOT_FOUND("Category image not found!", HttpStatus.NOT_FOUND),
-  CATEGORY_NAME_EMPTY("Category name is empty!", HttpStatus.BAD_REQUEST),
-  IMAGE_NOT_SUPPORT("Image file is not supported", HttpStatus.BAD_REQUEST),
-  IMAGE_NOT_FOUND("Image not found !", HttpStatus.NOT_FOUND),
+  CATEGORY_NOT_FOUND("Category not found", HttpStatus.NOT_FOUND),
+  SET_IMAGE_NOT_SUCCESS("Failed to upload category image", HttpStatus.BAD_REQUEST),
+  CATEGORY_IMAGE_NOT_FOUND("Category image not found", HttpStatus.NOT_FOUND),
+  CATEGORY_NAME_EMPTY("Category name cannot be empty!", HttpStatus.BAD_REQUEST),
+  IMAGE_NOT_SUPPORT(
+      "Unsupported image format. Please use JPG, PNG, TIFF, WebP or JFIF", HttpStatus.BAD_REQUEST),
+  IMAGE_NOT_FOUND("Image not found", HttpStatus.NOT_FOUND),
+  SORT_NOT_SUPPORTED("Sort not supported", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
