@@ -36,9 +36,12 @@ build/
 ### VS Code ###A
 .vscode/
 
+# Exclude .yaml files
 *.yaml
 
+# Exclude .env files
 *.env
 
-# Loại trừ các file application.properties
+# Exclude application.properties files
 application.properties
+
