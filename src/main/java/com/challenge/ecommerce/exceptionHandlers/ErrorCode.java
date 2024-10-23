@@ -13,7 +13,15 @@ public enum ErrorCode {
   REFRESH_TOKEN_FAILED("refresh token failed: bad request", HttpStatus.BAD_REQUEST),
   URL_NOT_EXIST("The requested URL does not exist.", HttpStatus.NOT_FOUND),
   PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST),
-  REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED);
+  REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED),
+  CATEGORY_EXISTED("Category name already existed", HttpStatus.BAD_REQUEST),
+  CATEGORY_NOT_FOUND("Category not found !", HttpStatus.NOT_FOUND),
+  SET_IMAGE_NOT_SUCCESS("Error while uploading file!", HttpStatus.BAD_REQUEST),
+  CATEGORY_IMAGE_NOT_FOUND("Category image not found!", HttpStatus.NOT_FOUND),
+  CATEGORY_NAME_EMPTY("Category name is empty!", HttpStatus.BAD_REQUEST),
+  IMAGE_NOT_SUPPORT("Image file is not supported", HttpStatus.BAD_REQUEST),
+  IMAGE_NOT_FOUND("Image not found !", HttpStatus.NOT_FOUND),
+  ;
 
   private final String message;
   private final HttpStatus statusCode;

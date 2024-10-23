@@ -14,4 +14,7 @@ public class ApiResponse<T> {
   String message;
   Integer totalPages;
   T result;
+  Long total;
+  Integer page;
+  Integer limit;
 }
