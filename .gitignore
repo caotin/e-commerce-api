@@ -29,5 +29,15 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+### VS Code ###A
 .vscode/
+
+
+# Loại trừ các file .yaml
+*.yaml
+
+# Loại trừ các file .env
+*.env
+
+# Loại trừ các file application.properties
+application.properties

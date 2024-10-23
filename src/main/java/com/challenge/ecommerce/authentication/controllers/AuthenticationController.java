@@ -31,7 +31,6 @@ public class AuthenticationController {
 
   @PostMapping("/signup")
   public ResponseEntity<ApiResponse<Void>> register() {
-
     return ResponseEntity.noContent().build();
   }
 
