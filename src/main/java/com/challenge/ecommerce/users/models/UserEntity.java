@@ -24,10 +24,10 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class UserEntity extends BaseEntity {
-    @Column(columnDefinition = "VARCHAR(100)")
+    @Column(nullable = false,unique = true,columnDefinition = "VARCHAR(100)")
     String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String email;
 
     @Column(nullable = false)
