@@ -18,6 +18,10 @@ target/
 *.iws
 *.iml
 *.ipr
+*#
+*.jar
+*.sw?
+*~
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,11 +36,8 @@ build/
 ### VS Code ###A
 .vscode/
 
-
-# Loại trừ các file .yaml
 *.yaml
 
-# Loại trừ các file .env
 *.env
 
 # Loại trừ các file application.properties
