@@ -2,7 +2,7 @@ package com.challenge.ecommerce.users.controllers;
 
 import com.challenge.ecommerce.users.controllers.dtos.UserGetResponse;
 import com.challenge.ecommerce.users.controllers.dtos.UserUpdateRequest;
-import com.challenge.ecommerce.users.services.impl.UserService;
+import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserControllers {
-  UserService userService;
+ IUserServices userService;
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<UserGetResponse>> getMyInformation() {

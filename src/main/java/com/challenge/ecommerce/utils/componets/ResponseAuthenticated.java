@@ -11,16 +11,6 @@ import java.io.IOException;
 
 public class ResponseAuthenticated {
   public static void getResponseAuthenticated(HttpServletResponse response) {
-    ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
-    response.setStatus(errorCode.getStatusCode().value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    ApiResponse<?> apiResponse = ApiResponse.builder().message(errorCode.getMessage()).build();
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-      response.flushBuffer();
-    } catch (IOException e) {
-      throw new CustomRuntimeException(ErrorCode.UNAUTHENTICATED);
-    }
+
   }
 }

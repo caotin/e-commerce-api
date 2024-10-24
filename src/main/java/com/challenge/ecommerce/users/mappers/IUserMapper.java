@@ -1,6 +1,6 @@
 package com.challenge.ecommerce.users.mappers;
 
-import com.challenge.ecommerce.users.controllers.dtos.UserCreatRequest;
+import com.challenge.ecommerce.users.controllers.dtos.UserCreateRequest;
 import com.challenge.ecommerce.users.controllers.dtos.UserGetResponse;
 import com.challenge.ecommerce.users.controllers.dtos.UserUpdateRequest;
 import com.challenge.ecommerce.users.models.UserEntity;
@@ -14,7 +14,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface IUserMapper {
   @Mapping(target = "password", ignore = true)
-  UserEntity userCreateDtoToEntity(UserCreatRequest userCreatRequest);
+  UserEntity userCreateDtoToEntity(UserCreateRequest userCreateRequest);
 
   UserGetResponse userEntityToUserGetResponse(UserEntity userEntity);
 

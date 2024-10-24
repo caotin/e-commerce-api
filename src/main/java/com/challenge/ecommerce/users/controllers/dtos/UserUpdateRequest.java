@@ -1,6 +1,5 @@
 package com.challenge.ecommerce.users.controllers.dtos;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -11,14 +10,16 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class UserUpdateRequest {
 
   String oldPassword;
 
-  @Size(min = 6, message = "Password length must be at least 6 characters")
+  @Size(min = 8, message = "Password length must be at least 8 characters")
   @Pattern(
-      regexp = "^[a-zA-Z0-9@#$%^&*()!]+$",
-      message = "Password must not contain spaces or accented characters")
+          regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+          message =
+                  "Password must contain at least one digit, one lowercase, one uppercase, one special character, and no whitespace")
   String newPassword;
 
   String confirmPassword;

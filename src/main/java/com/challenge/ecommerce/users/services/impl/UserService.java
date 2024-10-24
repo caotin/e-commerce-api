@@ -2,7 +2,7 @@ package com.challenge.ecommerce.users.services.impl;
 
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
-import com.challenge.ecommerce.users.controllers.dtos.UserCreatRequest;
+import com.challenge.ecommerce.users.controllers.dtos.UserCreateRequest;
 import com.challenge.ecommerce.users.controllers.dtos.UserGetResponse;
 import com.challenge.ecommerce.users.controllers.dtos.UserUpdateRequest;
 import com.challenge.ecommerce.users.mappers.IUserMapper;
@@ -11,6 +11,7 @@ import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.AuthUtils;
 import com.challenge.ecommerce.utils.enums.ResponseStatus;
+import com.challenge.ecommerce.utils.enums.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,16 +31,17 @@ public class UserService implements IUserServices {
   PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
   @Override
-  public ApiResponse<Void> signUp(UserCreatRequest userCreatRequest) {
-    if (userRepository.existsByEmail(userCreatRequest.getEmail())) {
+  public ApiResponse<Void> signUp(UserCreateRequest userCreateRequest) {
+    if (userRepository.existsByEmail(userCreateRequest.getEmail())) {
       throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
     }
-    if (!userCreatRequest.getPassword().equals(userCreatRequest.getConfirmPassword())) {
+    if (!userCreateRequest.getPassword().equals(userCreateRequest.getConfirmPassword())) {
       throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH);
     }
-    var user = userMapper.userCreateDtoToEntity(userCreatRequest);
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-    user.setName("user_" + UUID.randomUUID().toString().substring(0, 5));
+    var user = userMapper.userCreateDtoToEntity(userCreateRequest);
+    user.setPassword(passwordEncoder.encode(userCreateRequest.getPassword()));
+    user.setName("user_" + UUID.randomUUID().toString().substring(0, 8));
+    user.setRole(Role.USER);
     userRepository.save(user);
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_SIGNUP.getMessage()).build();
   }
@@ -48,11 +50,11 @@ public class UserService implements IUserServices {
   @Transactional
   public ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest) {
     if (userUpdateRequest.getEmail() != null) {
-      if (!userRepository.existsByEmail(userUpdateRequest.getEmail())) {
+      if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
         throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
       }
     } else if (userUpdateRequest.getName() != null) {
-      if (!userRepository.existsByName(userUpdateRequest.getName())) {
+      if (userRepository.existsByName(userUpdateRequest.getName())) {
         throw new CustomRuntimeException(ErrorCode.USERNAME_ALREADY_EXISTS);
       }
     }
