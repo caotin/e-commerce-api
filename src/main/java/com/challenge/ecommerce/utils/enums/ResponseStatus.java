@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ResponseStatus {
-  SUCCESS_LOGIN("Login Completed successfully !"),
+  SUCCESS_LOGIN("Login  successfully !"),
   SUCCESS("Operation completed successfully"),
   SUCCESS_SIGNUP("Signup completed successfully"),
   SUCCESS_UPDATE("Update completed successfully");

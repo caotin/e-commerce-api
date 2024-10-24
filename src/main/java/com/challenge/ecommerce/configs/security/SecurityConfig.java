@@ -27,10 +27,13 @@ public class SecurityConfig {
   CustomJwtDecoder customJwtDecoder;
   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   RestAccessDeniedHandler restAccessDeniedHandler;
-  String[] PUBLIC_POST_ENDPOINT = {"/api/auth/signup", "/api/auth/login"};
-  String[] PRIVATE_PUT_ENDPOINT = {"/api/users/me"};
-  String[] PRIVATE_GET_ENDPOINT = {"/api/users/me"};
-  String[] PRIVATE_POST_ENDPOINT = {"/api/auth/refresh"};
+  static final String[] PUBLIC_POST_ENDPOINT = {"/api/auth/signup", "/api/auth/login"};
+  static final String[] PRIVATE_PUT_ENDPOINT = {"/api/users/me"};
+  static final String[] PRIVATE_GET_ENDPOINT = {"/api/users/me"};
+  static final String[] PRIVATE_POST_ENDPOINT = {"/api/auth/refresh"};
+  static final String[] SWAGGER_WHITELIST = {
+    "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-resources"
+  };
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,6 +48,8 @@ public class SecurityConfig {
                 .hasAnyAuthority(Role.USER.toString())
                 .requestMatchers(HttpMethod.POST, PRIVATE_POST_ENDPOINT)
                 .hasAnyAuthority(Role.USER.toString())
+                .requestMatchers(SWAGGER_WHITELIST)
+                .permitAll()
                 .anyRequest()
                 .authenticated());
     http.oauth2ResourceServer(

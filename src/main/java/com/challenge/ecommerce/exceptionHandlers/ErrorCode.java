@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-  UNAUTHORIZED("Unauthorized access !", HttpStatus.UNAUTHORIZED),
+  UNAUTHORIZED("Unauthorized access !", HttpStatus.FORBIDDEN),
   UNAUTHENTICATED(" Please log in !", HttpStatus.UNAUTHORIZED),
   USER_NOT_FOUND("user not found !", HttpStatus.NOT_FOUND),
   USERNAME_ALREADY_EXISTS("username already exists!", HttpStatus.BAD_REQUEST),

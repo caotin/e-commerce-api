@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class UserGetResponse {
+
+  String  id;
+
   String name;
 
   String email;

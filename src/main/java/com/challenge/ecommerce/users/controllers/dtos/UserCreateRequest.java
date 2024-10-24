@@ -1,5 +1,6 @@
 package com.challenge.ecommerce.users.controllers.dtos;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -24,8 +25,6 @@ public class UserCreateRequest {
   String confirmPassword;
 
   @NotNull(message = "email must be not null")
-  @Pattern(
-      regexp = "^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-      message = "Invalid email format. Please enter a valid email (e.g., example@domain.com)")
+  @Email(message = "Invalid email format")
   String email;
 }

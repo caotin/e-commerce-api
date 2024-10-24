@@ -2,6 +2,7 @@ package com.challenge.ecommerce.exceptionHandlers;
 
 import com.challenge.ecommerce.utils.ApiResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,8 +19,10 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(value = MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-    String errorMessage = e.getBindingResult().getFieldErrors().stream()
+  public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
+    String errorMessage =
+        e.getBindingResult().getFieldErrors().stream()
             .findFirst()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
             .orElse("Invalid input data");
@@ -27,6 +30,6 @@ public class GlobalExceptionHandler {
     ApiResponse<?> apiResponse = new ApiResponse<>();
     apiResponse.setMessage(errorMessage);
 
-    return ResponseEntity.badRequest().body(apiResponse);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
 }
