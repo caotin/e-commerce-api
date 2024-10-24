@@ -66,17 +66,20 @@ public class UserService implements IUserServices {
     if (userUpdateRequest.getOldPassword() != null) {
       if (!passwordEncoder.matches(userUpdateRequest.getOldPassword(), oldUser.getPassword())) {
         throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
-      } else if (!userUpdateRequest
-          .getConfirmPassword()
-          .equals(userUpdateRequest.getNewPassword())) {
-        throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
+      }
+      if (userUpdateRequest.getNewPassword() == null) {
+        throw new CustomRuntimeException(ErrorCode.NEW_PASSWORD_CANNOT_BE_NULL);
+      }
+      if (userUpdateRequest.getConfirmPassword() == null) {
+        throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_CANNOT_BE_NULL);
+      }
+      if (userUpdateRequest.getNewPassword().equals(userUpdateRequest.getOldPassword())) {
+        throw new CustomRuntimeException(ErrorCode.PASSWORD_SHOULD_NOT_MATCH_OLD);
+      }
+      if (!userUpdateRequest.getNewPassword().equals(userUpdateRequest.getConfirmPassword())) {
+        throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH);
       }
       user.setPassword(passwordEncoder.encode(userUpdateRequest.getNewPassword()));
-    } else {
-      if (userUpdateRequest.getNewPassword() != null
-          || userUpdateRequest.getConfirmPassword() != null) {
-        throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
-      }
     }
     userRepository.save(user);
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_UPDATE.getMessage()).build();
