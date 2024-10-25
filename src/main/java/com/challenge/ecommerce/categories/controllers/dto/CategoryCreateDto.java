@@ -14,5 +14,7 @@ public class CategoryCreateDto {
   @NotEmpty(message = "Category name must not be empty")
   String name;
 
-  String category_parent_name;
+  String parentCategoryId;
+
+  String imageUrl;
 }

@@ -4,12 +4,14 @@ import com.challenge.ecommerce.categories.controllers.dto.CategoryCreateDto;
 import com.challenge.ecommerce.categories.controllers.dto.CategoryResponse;
 import com.challenge.ecommerce.categories.controllers.dto.CategoryUpdateDto;
 import com.challenge.ecommerce.categories.mappers.ICategoryMapper;
+import com.challenge.ecommerce.categories.models.CategoryEntity;
 import com.challenge.ecommerce.categories.repositories.CategoryRepository;
 import com.challenge.ecommerce.categories.services.ICategoryService;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.CloudUtils;
+import com.challenge.ecommerce.utils.StringHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,11 +36,23 @@ public class CategoryServiceImpl implements ICategoryService {
 
   @Override
   public CategoryResponse addCategory(CategoryCreateDto request) {
-    if (categoryRepository.existsByName(request.getName())) {
+    if (categoryRepository.existsByNameAndDeletedAtIsNull(request.getName())) {
       throw new CustomRuntimeException(ErrorCode.CATEGORY_EXISTED);
     }
     // mapper dto to entity
     var category = mapper.categoryCreateDtoToEntity(request);
+    var slug = StringHelper.toSlug(request.getName());
+    category.setSlug(slug);
+    if (request.getParentCategoryId() != null && !request.getParentCategoryId().isEmpty()) {
+      var parentCategory =
+          categoryRepository
+              .findByIdAndDeletedAt(request.getParentCategoryId())
+              .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_NOT_FOUND));
+      category.setParentCategory(parentCategory);
+    }
+    if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+      category.setCategory_img(request.getImageUrl());
+    }
     categoryRepository.save(category);
     // mapper entity to dto
     return mapper.categoryEntityToDto(category);
@@ -48,7 +62,14 @@ public class CategoryServiceImpl implements ICategoryService {
   public ApiResponse<?> getListCategories(Pageable pageable) {
     var categories = categoryRepository.findAllByDeletedAtIsNull(pageable);
     List<CategoryResponse> categoryResponses =
-        categories.stream().map(mapper::categoryEntityToDto).toList();
+        categories.stream()
+            .map(
+                category -> {
+                  var resp = mapper.categoryEntityToDto(category);
+                  SetListCategoryParent(resp, category);
+                  return resp;
+                })
+            .toList();
     return ApiResponse.builder()
         .totalPages(categories.getTotalPages())
         .result(categoryResponses)
@@ -60,74 +81,74 @@ public class CategoryServiceImpl implements ICategoryService {
   }
 
   @Override
-  public CategoryResponse getCategoryById(String id) {
+  public CategoryResponse getCategoryBySlug(String categorySlug) {
     var category =
         categoryRepository
-            .findByIdAndDeletedAt(id)
+            .findBySlugAndDeletedAt(categorySlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
-    return mapper.categoryEntityToDto(category);
+    var resp = mapper.categoryEntityToDto(category);
+    if (category.getParentCategory() != null) {
+      var parentCategory =
+          categoryRepository.findByIdAndDeletedAt(category.getParentCategory().getId());
+      resp.setParentCategory(mapper.categoryEntityToParentDto(parentCategory.get()));
+    }
+    SetListCategoryParent(resp, category);
+    return resp;
   }
 
   @Override
-  public CategoryResponse updateCategory(CategoryUpdateDto request, String id) {
+  public CategoryResponse updateCategory(CategoryUpdateDto request, String categorySlug) {
     var oldCategory =
         categoryRepository
-            .findByIdAndDeletedAt(id)
+            .findBySlugAndDeletedAt(categorySlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
+    if (request.getName() != null
+        && categoryRepository.existsByNameAndDeletedAtIsNull(request.getName())
+        && !request.getName().equals(oldCategory.getName())) {
+      throw new CustomRuntimeException(ErrorCode.CATEGORY_EXISTED);
+    }
     var newCategory = mapper.updateCategoryFromDto(request, oldCategory);
+    if (request.getParentCategoryId() != null && !request.getParentCategoryId().isEmpty()) {
+      if (request.getParentCategoryId().equals(oldCategory.getSlug()))
+        throw new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_FAILED_ITSELF);
+      var parentCategory =
+          categoryRepository
+              .findByIdAndDeletedAt(request.getParentCategoryId())
+              .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_NOT_FOUND));
+      if (parentCategory.getParentCategory() != null
+          && parentCategory.getParentCategory().getId().equals(oldCategory.getId())) {
+        throw new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_FAILED);
+      }
+      newCategory.setParentCategory(parentCategory);
+    }
+    // Thêm xử lý cho hình ảnh mới
+    if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+      newCategory.setCategory_img(request.getImageUrl());
+    }
     categoryRepository.save(newCategory);
-    return mapper.categoryEntityToDto(newCategory);
+    var resp = mapper.categoryEntityToDto(newCategory);
+    SetListCategoryParent(resp, newCategory);
+    return resp;
   }
 
   @Override
-  public CategoryResponse createOrUpdateCategoryImage(String id, MultipartFile file) {
+  public void deleteCategory(String categorySlug) {
     var category =
         categoryRepository
-            .findByIdAndDeletedAt(id)
+            .findBySlugAndDeletedAt(categorySlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
-    if (file != null && !file.isEmpty()) {
-      if (category.getCategory_img() != null && !category.getCategory_img().isEmpty())
-        cloudinary.deleteFileAsync(category.getCategory_img());
-      String link;
-      try {
-        link = cloudinary.uploadFileAsync(file).get();
-      } catch (InterruptedException | ExecutionException e) {
-        throw new CustomRuntimeException(ErrorCode.SET_IMAGE_NOT_SUCCESS);
-      }
-      category.setCategory_img(link);
+    category.setDeletedAt(LocalDateTime.now());
+    for (CategoryEntity child : category.getParentCategories()) {
+      child.setParentCategory(null);
+      categoryRepository.save(child);
     }
     categoryRepository.save(category);
-    return mapper.categoryEntityToDto(category);
   }
 
   @Override
-  public void deleteCategoryImageById(String id) {
-    var category =
-        categoryRepository
-            .findByIdAndDeletedAt(id)
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
-    var file = category.getCategory_img();
-    if (file != null) {
-      cloudinary.deleteFileAsync(file);
-      categoryRepository.deleteImage(file);
-    } else throw new CustomRuntimeException(ErrorCode.CATEGORY_IMAGE_NOT_FOUND);
-  }
-
-  @Override
-  public void deleteCategory(String id) {
-    var category =
-        categoryRepository
-            .findByIdAndDeletedAt(id)
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
-    cloudinary.deleteFileAsync(category.getCategory_img());
-    category.setDeletedAt(LocalDateTime.now());
-    categoryRepository.save(category);
-  }
-
-  @Override
-  public ApiResponse<?> getListCategoriesByParentName(
-      Pageable pageable, String categoryParentName) {
-    var categories = categoryRepository.findByParentName(categoryParentName, pageable);
+  public ApiResponse<?> getListCategoriesByParentSlug(
+      Pageable pageable, String categoryParentSlug) {
+    var categories = categoryRepository.findByParentSlugAndDeletedAt(categoryParentSlug, pageable);
     List<CategoryResponse> categoryResponses =
         categories.stream().map(mapper::categoryEntityToDto).toList();
     return ApiResponse.builder()
@@ -138,5 +159,14 @@ public class CategoryServiceImpl implements ICategoryService {
         .limit(categories.getNumberOfElements())
         .message("Get list category by parent name successfully")
         .build();
+  }
+
+  void SetListCategoryParent(CategoryResponse resp, CategoryEntity newCategory) {
+    if (newCategory.getParentCategories() != null) {
+      var listCategoryParent = categoryRepository.findByParentIdAndDeletedAt(newCategory.getId());
+      List<CategoryResponse> categoryResponses =
+          listCategoryParent.stream().map(mapper::categoryEntityToDto).toList();
+      resp.setParentCategories(categoryResponses);
+    }
   }
 }

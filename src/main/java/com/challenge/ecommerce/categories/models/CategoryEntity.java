@@ -21,16 +21,25 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class CategoryEntity extends BaseEntity {
-  @Column(nullable = false, columnDefinition = "VARCHAR(100)", unique = true)
+  @Column(nullable = false, columnDefinition = "VARCHAR(100)")
   String name;
-
-  @Column(columnDefinition = "VARCHAR(100)")
-  String category_parent_name;
 
   @Column(columnDefinition = "VARCHAR(2083)")
   String category_img;
 
+  @Column(nullable = false)
+  String slug;
+
   @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
   @JsonManagedReference
   Set<ProductEntity> products = new HashSet<>();
+
+  @ManyToOne
+  @JoinColumn(name = "parent_category_id", columnDefinition = "VARCHAR(100)")
+  @JsonManagedReference
+  CategoryEntity parentCategory;
+
+  @OneToMany(mappedBy = "parentCategory", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<CategoryEntity> parentCategories = new HashSet<>();
 }

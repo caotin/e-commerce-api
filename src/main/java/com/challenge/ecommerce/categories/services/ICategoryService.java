@@ -12,15 +12,11 @@ public interface ICategoryService {
 
   ApiResponse<?> getListCategories(Pageable pageable);
 
-  CategoryResponse getCategoryById(String id);
+  CategoryResponse getCategoryBySlug(String categorySlug);
 
-  CategoryResponse updateCategory(CategoryUpdateDto request, String id);
-
-  CategoryResponse createOrUpdateCategoryImage(String id, MultipartFile file);
-
-  void deleteCategoryImageById(String id);
+  CategoryResponse updateCategory(CategoryUpdateDto request, String categorySlug);
 
   void deleteCategory(String id);
 
-  ApiResponse<?> getListCategoriesByParentName(Pageable pageable, String categoryParentName);
+  ApiResponse<?> getListCategoriesByParentSlug(Pageable pageable, String categoryParentSlug);
 }

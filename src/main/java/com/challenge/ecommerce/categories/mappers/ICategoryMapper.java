@@ -1,13 +1,12 @@
 package com.challenge.ecommerce.categories.mappers;
 
 import com.challenge.ecommerce.categories.controllers.dto.CategoryCreateDto;
+import com.challenge.ecommerce.categories.controllers.dto.CategoryParentResponse;
 import com.challenge.ecommerce.categories.controllers.dto.CategoryResponse;
 import com.challenge.ecommerce.categories.controllers.dto.CategoryUpdateDto;
 import com.challenge.ecommerce.categories.models.CategoryEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface ICategoryMapper {
@@ -15,10 +14,8 @@ public interface ICategoryMapper {
 
   CategoryResponse categoryEntityToDto(CategoryEntity entity);
 
-  @Mapping(
-      target = "category_parent_name",
-      source = "category_parent_name",
-      nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  CategoryParentResponse categoryEntityToParentDto(CategoryEntity entity);
+
   CategoryEntity updateCategoryFromDto(
       CategoryUpdateDto request, @MappingTarget CategoryEntity oldEntity);
 }

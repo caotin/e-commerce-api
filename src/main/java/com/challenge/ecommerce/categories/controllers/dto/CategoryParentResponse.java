@@ -1,13 +1,10 @@
 package com.challenge.ecommerce.categories.controllers.dto;
 
-import com.challenge.ecommerce.categories.models.CategoryEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.URL;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -15,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
+public class CategoryParentResponse {
   @NotNull String id;
 
   @NotBlank String name;
@@ -23,8 +20,4 @@ public class CategoryResponse {
   @URL String category_img;
 
   @NotBlank String slug;
-
-  CategoryParentResponse parentCategory;
-
-  List<CategoryResponse> parentCategories;
 }

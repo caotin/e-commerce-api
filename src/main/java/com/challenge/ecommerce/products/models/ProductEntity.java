@@ -24,35 +24,38 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class ProductEntity extends BaseEntity {
-    @Column(nullable = false)
-    String title;
+  @Column(nullable = false)
+  String title;
 
-    @Lob
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    String description;
+  @Lob
+  @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+  String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @JsonBackReference
-    CategoryEntity category;
+  @Column(nullable = false)
+  String slug;
 
-    @OneToMany(mappedBy = "product" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<ProductOptionEntity> productOptions = new HashSet<>();
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
+  @JsonBackReference
+  CategoryEntity category;
 
-    @OneToMany(mappedBy = "product" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<ImageEntity> images = new HashSet<>();
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<ProductOptionEntity> productOptions = new HashSet<>();
 
-    @OneToMany(mappedBy = "product" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<FavoriteEntity> favorites = new HashSet<>();
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<ImageEntity> images = new HashSet<>();
 
-    @OneToMany(mappedBy = "product" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<ReviewEntity> reviews = new HashSet<>();
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<FavoriteEntity> favorites = new HashSet<>();
 
-    @OneToMany(mappedBy = "product" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<VariantEntity> variants = new HashSet<>();
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<ReviewEntity> reviews = new HashSet<>();
+
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<VariantEntity> variants = new HashSet<>();
 }
