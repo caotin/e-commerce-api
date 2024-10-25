@@ -24,7 +24,9 @@ public enum ErrorCode {
       "New password should not be the same as the old password", HttpStatus.BAD_REQUEST),
   // another error
   URL_NOT_EXIST("The requested URL does not exist.", HttpStatus.NOT_FOUND),
-  PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST);
+  PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST),
+  IMAGE_FILE_NOT_FOUND("The requested image file does not exist.", HttpStatus.NOT_FOUND),
+  IMAGE_DELETION_FAILED("Failed to delete the image file.", HttpStatus.INTERNAL_SERVER_ERROR);;
 
   private final String message;
   private final HttpStatus statusCode;

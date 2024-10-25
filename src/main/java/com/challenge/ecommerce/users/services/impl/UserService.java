@@ -10,6 +10,7 @@ import com.challenge.ecommerce.users.repositories.UserRepository;
 import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.AuthUtils;
+import com.challenge.ecommerce.utils.componets.CloudImageUtils;
 import com.challenge.ecommerce.utils.enums.ResponseStatus;
 import com.challenge.ecommerce.utils.enums.Role;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class UserService implements IUserServices {
   UserRepository userRepository;
   IUserMapper userMapper;
+  CloudImageUtils cloudImageUtils;
   PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
   @Override
@@ -81,6 +84,21 @@ public class UserService implements IUserServices {
       }
       user.setPassword(passwordEncoder.encode(userUpdateRequest.getNewPassword()));
     }
+    userRepository.save(user);
+    return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_UPDATE.getMessage()).build();
+  }
+
+  @Override
+  public ApiResponse<Void> updateImage(MultipartFile file) {
+    var user =
+        userRepository
+            .findByEmail(AuthUtils.getUserCurrent())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+    var link = cloudImageUtils.uploadFileAsync(file);
+    if (user.getAvatar_link() != null) {
+      cloudImageUtils.deleteFile(user.getAvatar_link());
+    }
+    user.setAvatar_link(link.toString());
     userRepository.save(user);
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_UPDATE.getMessage()).build();
   }
