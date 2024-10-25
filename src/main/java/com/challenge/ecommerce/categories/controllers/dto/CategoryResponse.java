@@ -1,6 +1,5 @@
 package com.challenge.ecommerce.categories.controllers.dto;
 
-import com.challenge.ecommerce.categories.models.CategoryEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -26,5 +25,5 @@ public class CategoryResponse {
 
   CategoryParentResponse parentCategory;
 
-  List<CategoryResponse> parentCategories;
+  List<CategoryResponse> childCategories;
 }

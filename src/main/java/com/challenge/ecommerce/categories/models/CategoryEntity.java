@@ -2,6 +2,7 @@ package com.challenge.ecommerce.categories.models;
 
 import com.challenge.ecommerce.products.models.ProductEntity;
 import com.challenge.ecommerce.utils.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,11 +36,11 @@ public class CategoryEntity extends BaseEntity {
   Set<ProductEntity> products = new HashSet<>();
 
   @ManyToOne
-  @JoinColumn(name = "parent_category_id", columnDefinition = "VARCHAR(100)")
-  @JsonManagedReference
+  @JoinColumn(name = "parent_category_id")
+  @JsonBackReference
   CategoryEntity parentCategory;
 
   @OneToMany(mappedBy = "parentCategory", fetch = FetchType.LAZY)
   @JsonManagedReference
-  Set<CategoryEntity> parentCategories = new HashSet<>();
+  Set<CategoryEntity> childCategories = new HashSet<>();
 }

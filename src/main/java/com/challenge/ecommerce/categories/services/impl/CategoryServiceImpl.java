@@ -10,7 +10,6 @@ import com.challenge.ecommerce.categories.services.ICategoryService;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.utils.ApiResponse;
-import com.challenge.ecommerce.utils.CloudUtils;
 import com.challenge.ecommerce.utils.StringHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +17,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +29,6 @@ public class CategoryServiceImpl implements ICategoryService {
 
   CategoryRepository categoryRepository;
   final ICategoryMapper mapper;
-  CloudUtils cloudinary;
 
   @Override
   public CategoryResponse addCategory(CategoryCreateDto request) {
@@ -109,7 +105,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
     var newCategory = mapper.updateCategoryFromDto(request, oldCategory);
     if (request.getParentCategoryId() != null && !request.getParentCategoryId().isEmpty()) {
-      if (request.getParentCategoryId().equals(oldCategory.getSlug()))
+      if (request.getParentCategoryId().equals(oldCategory.getId()))
         throw new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_FAILED_ITSELF);
       var parentCategory =
           categoryRepository
@@ -138,7 +134,7 @@ public class CategoryServiceImpl implements ICategoryService {
             .findBySlugAndDeletedAt(categorySlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
     category.setDeletedAt(LocalDateTime.now());
-    for (CategoryEntity child : category.getParentCategories()) {
+    for (CategoryEntity child : category.getChildCategories()) {
       child.setParentCategory(null);
       categoryRepository.save(child);
     }
@@ -162,11 +158,11 @@ public class CategoryServiceImpl implements ICategoryService {
   }
 
   void SetListCategoryParent(CategoryResponse resp, CategoryEntity newCategory) {
-    if (newCategory.getParentCategories() != null) {
+    if (newCategory.getChildCategories() != null) {
       var listCategoryParent = categoryRepository.findByParentIdAndDeletedAt(newCategory.getId());
       List<CategoryResponse> categoryResponses =
           listCategoryParent.stream().map(mapper::categoryEntityToDto).toList();
-      resp.setParentCategories(categoryResponses);
+      resp.setChildCategories(categoryResponses);
     }
   }
 }
