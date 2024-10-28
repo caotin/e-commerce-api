@@ -1,10 +1,11 @@
 package com.challenge.ecommerce.users.services.impl;
 
+import com.challenge.ecommerce.authentication.controllers.dtos.AuthenticationRequest;
+import com.challenge.ecommerce.authentication.controllers.dtos.AuthenticationResponse;
+import com.challenge.ecommerce.authentication.services.IAuthenticationService;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
-import com.challenge.ecommerce.users.controllers.dtos.UserCreateRequest;
-import com.challenge.ecommerce.users.controllers.dtos.UserGetResponse;
-import com.challenge.ecommerce.users.controllers.dtos.UserUpdateRequest;
+import com.challenge.ecommerce.users.controllers.dtos.*;
 import com.challenge.ecommerce.users.mappers.IUserMapper;
 import com.challenge.ecommerce.users.repositories.UserRepository;
 import com.challenge.ecommerce.users.services.IUserServices;
@@ -20,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Service
@@ -28,41 +32,57 @@ import java.util.UUID;
 public class UserService implements IUserServices {
   UserRepository userRepository;
   IUserMapper userMapper;
+  IAuthenticationService authenticationService;
   PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
+  // user register account
   @Override
-  public ApiResponse<Void> signUp(UserCreateRequest userCreateRequest) {
-    if (userRepository.existsByEmail(userCreateRequest.getEmail())) {
-      throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
-    }
-    if (!userCreateRequest.getPassword().equals(userCreateRequest.getConfirmPassword())) {
-      throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH);
-    }
+  public ApiResponse<AuthenticationResponse> signUp(UserCreateRequest userCreateRequest) {
+    checkEmailUnique(userCreateRequest.getEmail());
+    checkPasswordConfirm(userCreateRequest.getPassword(), userCreateRequest.getConfirmPassword());
     var user = userMapper.userCreateDtoToEntity(userCreateRequest);
     user.setPassword(passwordEncoder.encode(userCreateRequest.getPassword()));
+    // create name account with UUID random
     user.setName("user_" + UUID.randomUUID().toString().substring(0, 8));
     user.setRole(Role.USER);
     userRepository.save(user);
+    var auth =
+        AuthenticationRequest.builder()
+            .email(user.getEmail())
+            .password(userCreateRequest.getPassword())
+            .build();
+    var resp = authenticationService.authenticate(auth);
+    resp.setMessage(ResponseStatus.SUCCESS_SIGNUP.getMessage());
+    return resp;
+  }
+
+  @Override
+  public ApiResponse<Void> AdminSignUp(AdminCreateUserRequest adminCreateUserRequest) {
+    checkEmailUnique(adminCreateUserRequest.getEmail());
+    checkPasswordConfirm(
+        adminCreateUserRequest.getNewPassword(), adminCreateUserRequest.getConfirmPassword());
+    var user = userMapper.adminCreateUserDtoToEntity(adminCreateUserRequest);
+    user.setPassword(passwordEncoder.encode(adminCreateUserRequest.getNewPassword()));
+    user.setName("user_" + UUID.randomUUID().toString().substring(0, 8));
+    if (adminCreateUserRequest.getRole().equals(Role.ADMIN.toString())) {
+      user.setRole(Role.ADMIN);
+    } else {
+      user.setRole(Role.USER);
+    }
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_SIGNUP.getMessage()).build();
   }
 
   @Override
   @Transactional
   public ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.getEmail() != null) {
-      if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
-        throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
-      }
-    } else if (userUpdateRequest.getName() != null) {
-      if (userRepository.existsByName(userUpdateRequest.getName())) {
-        throw new CustomRuntimeException(ErrorCode.USERNAME_ALREADY_EXISTS);
-      }
-    }
+    if (userUpdateRequest.getName() != null) checkNameUnique(userUpdateRequest.getName());
+    if (userUpdateRequest.getEmail() != null) checkEmailUnique(userUpdateRequest.getEmail());
     var oldUser =
         userRepository
             .findByEmail(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     var user = userMapper.userUpdateDtoToEntity(oldUser, userUpdateRequest);
+    // check update password when password not null .
     if (userUpdateRequest.getOldPassword() != null) {
       if (!passwordEncoder.matches(userUpdateRequest.getOldPassword(), oldUser.getPassword())) {
         throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
@@ -76,9 +96,8 @@ public class UserService implements IUserServices {
       if (userUpdateRequest.getNewPassword().equals(userUpdateRequest.getOldPassword())) {
         throw new CustomRuntimeException(ErrorCode.PASSWORD_SHOULD_NOT_MATCH_OLD);
       }
-      if (!userUpdateRequest.getNewPassword().equals(userUpdateRequest.getConfirmPassword())) {
-        throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH);
-      }
+      checkPasswordConfirm(
+          userUpdateRequest.getNewPassword(), userUpdateRequest.getConfirmPassword());
       user.setPassword(passwordEncoder.encode(userUpdateRequest.getNewPassword()));
     }
     userRepository.save(user);
@@ -90,10 +109,73 @@ public class UserService implements IUserServices {
     var user =
         userRepository
             .findByEmail(AuthUtils.getUserCurrent())
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.UNAUTHENTICATED));
 
     return ApiResponse.<UserGetResponse>builder()
         .result(userMapper.userEntityToUserGetResponse(user))
         .build();
+  }
+
+  @Override
+  @Transactional
+  public ApiResponse<Void> AdminUpdateUserDetail(
+      AdminUpdateUserRequest adminUpdateUserRequest, String userId) {
+    if (adminUpdateUserRequest.getName() != null) checkNameUnique(adminUpdateUserRequest.getName());
+    if (adminUpdateUserRequest.getEmail() != null)
+      checkEmailUnique(adminUpdateUserRequest.getEmail());
+    var oldUser =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+    // check update password when password not null .
+    if (adminUpdateUserRequest.getNewPassword() != null) {
+      if (adminUpdateUserRequest.getConfirmPassword() == null)
+        throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_CANNOT_BE_NULL);
+      checkPasswordConfirm(
+          adminUpdateUserRequest.getNewPassword(), adminUpdateUserRequest.getConfirmPassword());
+      oldUser.setPassword(passwordEncoder.encode(adminUpdateUserRequest.getNewPassword()));
+    }
+    var newUser = userMapper.adminUpdateUserDtoToEntity(oldUser, adminUpdateUserRequest);
+    userRepository.save(newUser);
+    return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_UPDATE.getMessage()).build();
+  }
+
+  @Override
+  @Transactional
+  public ApiResponse<Void> AdminDeleteUser(List<String> ids) {
+    StringJoiner joiner = new StringJoiner(" ");
+    for (String id : ids) {
+      var user =
+          userRepository
+              .findById(id)
+              .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+      user.setDeletedAt(LocalDateTime.now());
+      userRepository.save(user);
+      joiner.add(user.getName());
+    }
+    return ApiResponse.<Void>builder()
+        .message(ResponseStatus.SUCCESS_DELETE.getFormattedMessage(joiner.toString()))
+        .build();
+  }
+
+  // check email unique .
+  private void checkEmailUnique(String email) {
+    if (userRepository.existsByEmail(email)) {
+      throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
+    }
+  }
+
+  // check user name unique .
+  private void checkNameUnique(String name) {
+    if (userRepository.existsByName(name)) {
+      throw new CustomRuntimeException(ErrorCode.USERNAME_ALREADY_EXISTS);
+    }
+  }
+
+  // check password confirm exactly .
+  private void checkPasswordConfirm(String newPassword, String confirmPassword) {
+    if (!newPassword.equals(confirmPassword)) {
+      throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH);
+    }
   }
 }
