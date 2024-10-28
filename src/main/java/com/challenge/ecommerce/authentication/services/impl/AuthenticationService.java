@@ -68,7 +68,20 @@ public class AuthenticationService implements IAuthenticationService {
     if (!passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword())) {
       throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
     }
-    return getAuthenticationResponseApiResponse(user);
+    var refreshToken = generateToken(user, TokenType.refresh_token);
+    user.setRefresh_token(passwordEncoder.encode(refreshToken));
+    userRepository.save(user);
+    var authenticationResponse =
+        AuthenticationResponse.builder()
+            .name(user.getName())
+            .role(user.getRole().toString())
+            .accessToken(generateToken(user, TokenType.access_token))
+            .refreshToken(refreshToken)
+            .build();
+    return ApiResponse.<AuthenticationResponse>builder()
+        .message(ResponseStatus.SUCCESS_LOGIN.getMessage())
+        .result(authenticationResponse)
+        .build();
   }
 
   @Override
@@ -79,9 +92,7 @@ public class AuthenticationService implements IAuthenticationService {
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     user.setRefresh_token(null);
     userRepository.save(user);
-    return ApiResponse.<Void>builder()
-        .message(ResponseStatus.SUCCESS.getMessage())
-        .build();
+    return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS.getMessage()).build();
   }
 
   @Override
@@ -105,31 +116,23 @@ public class AuthenticationService implements IAuthenticationService {
           userRepository
               .findByEmail(email)
               .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
-      if (!passwordEncoder.matches(user.getRefresh_token(), request.getRefreshToken())) {
+      if (!passwordEncoder.matches(request.getRefreshToken(), user.getRefresh_token())) {
         throw new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_FAILED);
       }
-      return getAuthenticationResponseApiResponse(user);
+      var refreshToken = generateToken(user, TokenType.refresh_token);
+      user.setRefresh_token(passwordEncoder.encode(refreshToken));
+      userRepository.save(user);
+      var authenticationResponse =
+          AuthenticationResponse.builder()
+              .name(user.getName())
+              .role(user.getRole().toString())
+              .accessToken(generateToken(user, TokenType.access_token))
+              .refreshToken(refreshToken)
+              .build();
+      return ApiResponse.<AuthenticationResponse>builder().result(authenticationResponse).build();
     } catch (ParseException e) {
       throw new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_FAILED);
     }
-  }
-
-  private ApiResponse<AuthenticationResponse> getAuthenticationResponseApiResponse(
-      UserEntity user) {
-    var refreshToken = generateToken(user, TokenType.refresh_token);
-    user.setRefresh_token(passwordEncoder.encode(refreshToken));
-    userRepository.save(user);
-    var authenticationResponse =
-        AuthenticationResponse.builder()
-            .name(user.getName())
-            .role(user.getRole().toString())
-            .accessToken(generateToken(user, TokenType.access_token))
-            .refreshToken(refreshToken)
-            .build();
-    return ApiResponse.<AuthenticationResponse>builder()
-        .message(ResponseStatus.SUCCESS.getMessage())
-        .result(authenticationResponse)
-        .build();
   }
 
   private String generateToken(UserEntity userEntity, TokenType type) {

@@ -1,8 +1,10 @@
 package com.challenge.ecommerce.exceptionHandlers;
 
 import com.challenge.ecommerce.utils.ApiResponse;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,23 +18,27 @@ public class GlobalExceptionHandler {
     apiResponse.setMessage(e.getMessage());
     return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
   }
-
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-    String message =
-        ex.getBindingResult().getFieldErrors().stream()
-            .map(error -> error.getDefaultMessage())
+  @ExceptionHandler(value = MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
+    String errorMessage =
+        e.getBindingResult().getFieldErrors().stream()
             .findFirst()
-            .orElse("Validation error");
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .orElse("Invalid input data");
+
     ApiResponse<?> apiResponse = new ApiResponse<>();
-    apiResponse.setMessage(message);
+    apiResponse.setMessage(errorMessage);
+
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
 
-  @ExceptionHandler(value = IllegalArgumentException.class)
-  public ResponseEntity<ApiResponse<?>> handleIllegalArgumentException(IllegalArgumentException e) {
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<?> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException ex) {
+    String errorMessage = "Invalid JSON format: " + ex.getLocalizedMessage();
     ApiResponse<?> apiResponse = new ApiResponse<>();
-    apiResponse.setMessage(e.getMessage());
-    return ResponseEntity.badRequest().body(apiResponse);
+    apiResponse.setMessage(errorMessage);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
   }
 }
