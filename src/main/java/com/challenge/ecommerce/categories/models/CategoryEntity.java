@@ -2,6 +2,7 @@ package com.challenge.ecommerce.categories.models;
 
 import com.challenge.ecommerce.products.models.ProductEntity;
 import com.challenge.ecommerce.utils.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,13 +22,25 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class CategoryEntity extends BaseEntity {
-    @Column(nullable = false, columnDefinition = "VARCHAR(100)")
-    String name;
+  @Column(nullable = false, columnDefinition = "VARCHAR(100)")
+  String name;
 
-    @Column(columnDefinition = "VARCHAR(2083)")
-    String category_img;
+  @Column(columnDefinition = "VARCHAR(2083)")
+  String category_img;
 
-    @OneToMany(mappedBy = "category" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<ProductEntity> products = new HashSet<>();
+  @Column(nullable = false)
+  String slug;
+
+  @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<ProductEntity> products = new HashSet<>();
+
+  @ManyToOne
+  @JoinColumn(name = "parent_category_id")
+  @JsonBackReference
+  CategoryEntity parentCategory;
+
+  @OneToMany(mappedBy = "parentCategory", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<CategoryEntity> childCategories = new HashSet<>();
 }
