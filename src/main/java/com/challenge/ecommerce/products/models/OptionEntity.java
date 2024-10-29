@@ -20,18 +20,18 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class OptionEntity extends BaseEntity {
-    @Column(nullable = false, unique = true, columnDefinition = "VARCHAR(100)")
-    String option_name;
+  @Column(nullable = false, columnDefinition = "VARCHAR(100)")
+  String option_name;
 
-    @OneToMany(mappedBy = "option" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<OptionValueEntity> optionValues = new HashSet<>();
+  @OneToMany(mappedBy = "option", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<OptionValueEntity> optionValues = new HashSet<>();
 
-    @OneToMany(mappedBy = "option" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<ProductOptionEntity> productOptions = new HashSet<>();
+  @OneToMany(mappedBy = "option", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<ProductOptionEntity> productOptions = new HashSet<>();
 
-    @OneToMany(mappedBy = "option" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<VariantValueEntity> variantValues = new HashSet<>();
+  @OneToMany(mappedBy = "option", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<VariantValueEntity> variantValues = new HashSet<>();
 }

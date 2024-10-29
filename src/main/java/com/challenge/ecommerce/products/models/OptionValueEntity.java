@@ -21,15 +21,15 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class OptionValueEntity extends BaseEntity {
-    @Column(nullable = false,unique = true, columnDefinition = "VARCHAR(100)")
-    String value_name;
+  @Column(nullable = false, columnDefinition = "VARCHAR(100)")
+  String value_name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @JsonBackReference
-    OptionEntity option;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
+  @JsonBackReference
+  OptionEntity option;
 
-    @OneToMany(mappedBy = "optionValue" ,fetch = FetchType.LAZY)
-    @JsonManagedReference
-    Set<VariantValueEntity> variantValues = new HashSet<>();
+  @OneToMany(mappedBy = "optionValue", fetch = FetchType.LAZY)
+  @JsonManagedReference
+  Set<VariantValueEntity> variantValues = new HashSet<>();
 }

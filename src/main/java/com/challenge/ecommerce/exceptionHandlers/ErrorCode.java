@@ -41,6 +41,9 @@ public enum ErrorCode {
   CATEGORY_PARENT_FAILED(
       "category is creating a ParentCategory that is a child of that category",
       HttpStatus.BAD_REQUEST),
+  OPTION_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
+  OPTION_VALUE_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
+  OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
   ;
 
   private final String message;
