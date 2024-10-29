@@ -16,7 +16,7 @@ public class UserCreateRequest {
   @NotNull(message = "password  must be not null")
   @Size(min = 8, message = "Password length must be at least 8 characters")
   @Pattern(
-      regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+      regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&!+=])(?=\\S+$).{8,}$",
       message =
           "Password must be at least 8 characters long, and contain at least one digit, one lowercase letter, one uppercase letter, and one special character, with no whitespace.")
   String password;

@@ -6,27 +6,31 @@ import com.challenge.ecommerce.utils.enums.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
 @Configuration
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class UserAdminAccountInit {
-  PasswordEncoder passwordEncoder;
+  final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-  @NonFinal static final String ADMIN_USER_NAME = "admin";
+  @Value("${app.admin.username}")
+  String ADMIN_USER_NAME;
 
-  @NonFinal static final String ADMIN_PASSWORD = "admin123";
+  @Value("${app.admin.password}")
+  String ADMIN_PASSWORD;
 
-  @NonFinal static final String ADMIN_EMAIL = "hoangminhhoai.gv2002@gmail.com";
+  @Value("${app.admin.email}")
+  String ADMIN_EMAIL;
 
   @Bean
   ApplicationRunner applicationRunner(UserRepository userRepository) {

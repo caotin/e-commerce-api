@@ -1,6 +1,6 @@
 package com.challenge.ecommerce.users.controllers.dtos;
 
-import com.challenge.ecommerce.utils.componets.customannotation.AllowedImageFileType;
+import com.challenge.ecommerce.utils.components.customannotation.AllowedImageFileType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class AdminCreateUserRequest {
   @Size(min = 8, message = "Password length must be at least 8 characters")
   @Pattern(
-      regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+      regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+!=])(?=\\S+$).{8,}$",
       message =
           "Password must contain at least one digit, one lowercase, one uppercase, one special character, and no whitespace")
   String newPassword;

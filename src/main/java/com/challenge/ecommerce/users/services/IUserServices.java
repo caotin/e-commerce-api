@@ -7,14 +7,19 @@ import com.challenge.ecommerce.utils.ApiResponse;
 import java.util.List;
 
 public interface IUserServices {
-    // User register account method
-    ApiResponse<AuthenticationResponse> signUp(UserCreateRequest userCreateRequest);
-    // User update detail account method
-    ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest);
-    // User read user profile .
-    ApiResponse<UserGetResponse> getMe();
+  // User register account method
+  ApiResponse<AuthenticationResponse> signUp(UserCreateRequest userCreateRequest);
 
-    ApiResponse<Void> AdminSignUp (AdminCreateUserRequest adminCreateUserRequest);
-    ApiResponse<Void> AdminUpdateUserDetail(AdminUpdateUserRequest adminUpdateUserRequest,String userId);
-    ApiResponse<Void> AdminDeleteUser(List<String> ids);
+  // User update detail account method
+  ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest);
+
+  // User read user profile .
+  ApiResponse<UserGetResponse> getMe();
+
+  ApiResponse<Void> adminSignUp(AdminCreateUserRequest adminCreateUserRequest);
+
+  ApiResponse<Void> adminUpdateUserDetail(
+      AdminUpdateUserRequest adminUpdateUserRequest, String userId);
+
+  ApiResponse<Void> adminDeleteUser(AdminDeleteUserRequest adminDeleteUserRequest);
 }

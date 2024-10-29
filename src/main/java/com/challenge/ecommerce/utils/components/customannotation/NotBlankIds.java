@@ -1,8 +1,7 @@
-package com.challenge.ecommerce.utils.componets.customannotation;
+package com.challenge.ecommerce.utils.components.customannotation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-
 import java.lang.annotation.*;
 
 @Documented
@@ -10,7 +9,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotBlankIds {
-  String message() default "List of IDs cannot be empty or contain blank values";
+  String message() default "List of Ids cannot be empty or contain blank values";
 
   Class<?>[] groups() default {};
 

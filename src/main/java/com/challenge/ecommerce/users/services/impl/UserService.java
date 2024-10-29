@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -57,7 +56,7 @@ public class UserService implements IUserServices {
   }
 
   @Override
-  public ApiResponse<Void> AdminSignUp(AdminCreateUserRequest adminCreateUserRequest) {
+  public ApiResponse<Void> adminSignUp(AdminCreateUserRequest adminCreateUserRequest) {
     checkEmailUnique(adminCreateUserRequest.getEmail());
     checkPasswordConfirm(
         adminCreateUserRequest.getNewPassword(), adminCreateUserRequest.getConfirmPassword());
@@ -118,7 +117,7 @@ public class UserService implements IUserServices {
 
   @Override
   @Transactional
-  public ApiResponse<Void> AdminUpdateUserDetail(
+  public ApiResponse<Void> adminUpdateUserDetail(
       AdminUpdateUserRequest adminUpdateUserRequest, String userId) {
     if (adminUpdateUserRequest.getName() != null) checkNameUnique(adminUpdateUserRequest.getName());
     if (adminUpdateUserRequest.getEmail() != null)
@@ -136,15 +135,21 @@ public class UserService implements IUserServices {
       oldUser.setPassword(passwordEncoder.encode(adminUpdateUserRequest.getNewPassword()));
     }
     var newUser = userMapper.adminUpdateUserDtoToEntity(oldUser, adminUpdateUserRequest);
+    newUser.setRole(Role.USER);
+    if (adminUpdateUserRequest.getRole() != null) {
+      if (adminUpdateUserRequest.getRole().equals(Role.ADMIN.toString())) {
+        newUser.setRole(Role.ADMIN);
+      }
+    }
     userRepository.save(newUser);
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_UPDATE.getMessage()).build();
   }
 
   @Override
   @Transactional
-  public ApiResponse<Void> AdminDeleteUser(List<String> ids) {
+  public ApiResponse<Void> adminDeleteUser(AdminDeleteUserRequest adminDeleteUserRequest) {
     StringJoiner joiner = new StringJoiner(" ");
-    for (String id : ids) {
+    for (String id : adminDeleteUserRequest.getIds()) {
       var user =
           userRepository
               .findById(id)

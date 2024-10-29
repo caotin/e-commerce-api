@@ -19,6 +19,7 @@ public interface IUserMapper {
   UserEntity adminCreateUserDtoToEntity(AdminCreateUserRequest adminCreateUserRequest);
 
   @Mapping(target = "password", ignore = true)
+  @Mapping(target = "role",ignore = true)
   UserEntity adminUpdateUserDtoToEntity(
     @MappingTarget  UserEntity user, AdminUpdateUserRequest adminUpdateUserRequest);
 

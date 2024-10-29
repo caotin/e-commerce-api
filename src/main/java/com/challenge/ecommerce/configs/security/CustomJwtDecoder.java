@@ -3,7 +3,6 @@ package com.challenge.ecommerce.configs.security;
 import com.challenge.ecommerce.authentication.controllers.dtos.IntrospectRequest;
 import com.challenge.ecommerce.authentication.services.IAuthenticationService;
 import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -17,9 +16,13 @@ public class CustomJwtDecoder implements JwtDecoder {
   @NonFinal
   String SIGNER_KEY_ACCESS;
 
-  @Autowired private IAuthenticationService authenticationService;
+  private final IAuthenticationService authenticationService;
 
   private NimbusJwtDecoder nimbusJwtDecoder = null;
+
+  public CustomJwtDecoder(IAuthenticationService authenticationService) {
+    this.authenticationService = authenticationService;
+  }
 
   @Override
   public Jwt decode(String token) {

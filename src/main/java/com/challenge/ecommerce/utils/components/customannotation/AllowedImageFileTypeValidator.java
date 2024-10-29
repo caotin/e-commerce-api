@@ -1,4 +1,4 @@
-package com.challenge.ecommerce.utils.componets.customannotation;
+package com.challenge.ecommerce.utils.components.customannotation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -1,11 +1,14 @@
 package com.challenge.ecommerce.users.controllers.admin;
 
 import com.challenge.ecommerce.users.controllers.dtos.AdminCreateUserRequest;
+import com.challenge.ecommerce.users.controllers.dtos.AdminDeleteUserRequest;
 import com.challenge.ecommerce.users.controllers.dtos.AdminUpdateUserRequest;
 import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
-import com.challenge.ecommerce.utils.componets.customannotation.NotBlankIds;
+import com.challenge.ecommerce.utils.components.customannotation.NotBlankIds;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,20 +29,20 @@ public class UserControllers {
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<Void>> register(
       @RequestBody @Valid AdminCreateUserRequest request) {
-    var resp = userServices.AdminSignUp(request);
+    var resp = userServices.adminSignUp(request);
     return ResponseEntity.ok().body(resp);
   }
 
   @PutMapping("/{userId}")
   public ResponseEntity<ApiResponse<Void>> updateUser(
       @PathVariable String userId, @RequestBody @Valid AdminUpdateUserRequest request) {
-    var resp = userServices.AdminUpdateUserDetail(request, userId);
+    var resp = userServices.adminUpdateUserDetail(request, userId);
     return ResponseEntity.ok().body(resp);
   }
 
   @DeleteMapping
-  public ResponseEntity<ApiResponse<Void>> deleteUser(@NotBlankIds List<String> ids) {
-    var resp = userServices.AdminDeleteUser(ids);
+  public ResponseEntity<ApiResponse<Void>> deleteUser(@RequestBody @Valid AdminDeleteUserRequest request) {
+    var resp = userServices.adminDeleteUser(request);
     return ResponseEntity.ok().body(resp);
   }
 }
