@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -24,19 +25,19 @@ public class ProductResponse {
 
   LocalDateTime createdAt;
 
-  Integer totalFavorites;
+  int totalFavorites;
 
-  Integer totalRates;
+  int totalRates;
 
-  Integer totalSold;
+  int totalSold;
 
   String slug;
 
   CategoryResponse category;
 
-  List<ProductImageResponse> images;
+  List<ProductImageResponse> images = new ArrayList<>();
 
-  // List<ReviewResponse> reviews;
+  // List<ReviewResponse> reviews = new ArrayList<>();;
 
   VariantShortResponse variants;
 }

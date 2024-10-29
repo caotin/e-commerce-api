@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class ProductServiceImpl implements IProductService {
   ImageRepository imageRepository;
   IImageMapper imageMapper;
 
+  @Transactional
   @Override
   public ProductResponse addProduct(ProductCreateDto request) {
     var category =
@@ -53,7 +55,7 @@ public class ProductServiceImpl implements IProductService {
     productRepository.save(product);
 
     // Save list images
-    SaveImage(request.getImages(), product);
+    saveImage(request.getImages(), product);
 
     // set option
 
@@ -62,8 +64,8 @@ public class ProductServiceImpl implements IProductService {
     var resp = mapper.productEntityToDto(product);
 
     // set total fields
-    SetTotal(resp, product);
-    SetListImage(resp, product);
+    setTotal(resp, product);
+    setListImage(resp, product);
     return resp;
   }
 
@@ -103,7 +105,7 @@ public class ProductServiceImpl implements IProductService {
             .map(
                 product -> {
                   var response = mapper.productEntityToDto(product);
-                  SetListImage(response, product);
+                  setListImage(response, product);
                   return response;
                 })
             .toList();
@@ -117,24 +119,29 @@ public class ProductServiceImpl implements IProductService {
         .build();
   }
 
-  void SetListImage(ProductResponse resp, ProductEntity product) {
+  void setListImage(ProductResponse resp, ProductEntity product) {
     var listImages = imageRepository.findByIdProductAndDeletedAt(product.getId());
     List<ProductImageResponse> response =
         listImages.stream().map(imageMapper::imageEntityToDto).toList();
     resp.setImages(response);
   }
 
-  void SaveImage(List<ProductImageCreateDto> list, ProductEntity product) {
-    for (ProductImageCreateDto child : list) {
-      ImageEntity imageEntity = new ImageEntity();
-      imageEntity.setImages_url(child.getImages_url());
-      imageEntity.setType_image(child.getType_image());
-      imageEntity.setProduct(product);
-      imageRepository.save(imageEntity);
-    }
+  void saveImage(List<ProductImageCreateDto> list, ProductEntity product) {
+    List<ImageEntity> imageEntities =
+        list.stream()
+            .map(
+                child -> {
+                  ImageEntity imageEntity = new ImageEntity();
+                  imageEntity.setImages_url(child.getImages_url());
+                  imageEntity.setType_image(child.getType_image());
+                  imageEntity.setProduct(product);
+                  return imageEntity;
+                })
+            .toList();
+    imageRepository.saveAll(imageEntities);
   }
 
-  void SetTotal(ProductResponse resp, ProductEntity product) {
+  void setTotal(ProductResponse resp, ProductEntity product) {
     // set total favorites
     var totalFavorites = 0;
     resp.setTotalFavorites(totalFavorites);
