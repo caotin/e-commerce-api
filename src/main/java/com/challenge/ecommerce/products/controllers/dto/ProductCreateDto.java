@@ -15,7 +15,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductCreateDto {
   @NotBlank(message = "Product title cannot be blank")
-  @Size(min = 2, max = 60, message = "Product title must be between 2 and 50 characters")
+  @Size(min = 2, max = 60, message = "Product title must be between 2 and 60 characters")
   String title;
 
   @NotBlank(message = "Product description cannot be blank")
@@ -26,18 +26,18 @@ public class ProductCreateDto {
   String categoryId;
 
   @NotNull(message = "Price must not be null")
-  @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
+  @Positive(message = "Price must be greater than zero")
   BigDecimal price;
 
   @NotNull(message = "Stock quantity must not be null")
   @Min(value = 0, message = "Stock quantity must be non-negative")
-  Integer stock_quantity;
+  Integer stockQuantity;
 
   @NotBlank(message = "Option Id must not be null")
-  String option_id;
+  String optionId;
 
   @NotBlank(message = "Value Id must not be null")
-  String value_id;
+  String valueId;
 
   @NotEmpty(message = "Images list cannot be empty")
   List<ProductImageCreateDto> images;

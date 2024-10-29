@@ -23,11 +23,11 @@ public class ProductShortResponse {
 
   LocalDateTime createdAt;
 
-  Integer totalFavorites;
+  int totalFavorites;
 
-  Integer totalRates;
+  int totalRates;
 
-  Integer totalSold;
+  int totalSold;
 
   String slug;
 
