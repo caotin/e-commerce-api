@@ -33,7 +33,7 @@ public class AuthenticationController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<ApiResponse<Void>> register(
+  public ResponseEntity<ApiResponse<AuthenticationResponse>> register(
       @RequestBody @Valid UserCreateRequest userCreateRequest) {
     var resp = userServices.signUp(userCreateRequest);
     return ResponseEntity.ok().body(resp);

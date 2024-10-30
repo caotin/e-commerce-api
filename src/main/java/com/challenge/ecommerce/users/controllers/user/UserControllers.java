@@ -1,4 +1,4 @@
-package com.challenge.ecommerce.users.controllers;
+package com.challenge.ecommerce.users.controllers.user;
 
 import com.challenge.ecommerce.users.controllers.dtos.UserGetResponse;
 import com.challenge.ecommerce.users.controllers.dtos.UserUpdateRequest;
@@ -12,13 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController(value = "UserControllerOfUser")
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserControllers {
- IUserServices userService;
+  IUserServices userService;
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<UserGetResponse>> getMyInformation() {

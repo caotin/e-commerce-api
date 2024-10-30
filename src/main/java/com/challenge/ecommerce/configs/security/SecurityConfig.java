@@ -27,10 +27,15 @@ public class SecurityConfig {
   CustomJwtDecoder customJwtDecoder;
   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
   RestAccessDeniedHandler restAccessDeniedHandler;
-  static final String[] PUBLIC_POST_ENDPOINT = {"/api/auth/signup", "/api/auth/login"};
+  static final String[] PUBLIC_POST_ENDPOINT = {
+    "/api/auth/signup", "/api/auth/login", "/api/auth/refresh"
+  };
   static final String[] PRIVATE_PUT_ENDPOINT = {"/api/users/me"};
   static final String[] PRIVATE_GET_ENDPOINT = {"/api/users/me"};
-  static final String[] PRIVATE_POST_ENDPOINT = {"/api/auth/refresh"};
+  static final String[] PRIVATE_ADMIN_POST_ENDPOINT = {"/api/users/register"};
+  static final String[] PRIVATE_ADMIN_PUT_ENDPOINT = {"/api/users/*"};
+  static final String[] PRIVATE_ADMIN_DELETE_ENDPOINT = {"/api/users"};
+
   static final String[] SWAGGER_WHITELIST = {
     "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-resources"
   };
@@ -43,11 +48,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINT)
                 .permitAll()
                 .requestMatchers(HttpMethod.PUT, PRIVATE_PUT_ENDPOINT)
-                .hasAnyAuthority(Role.USER.toString())
+                .hasAnyAuthority(Role.USER.toString(), Role.ADMIN.toString())
                 .requestMatchers(HttpMethod.GET, PRIVATE_GET_ENDPOINT)
-                .hasAnyAuthority(Role.USER.toString())
-                .requestMatchers(HttpMethod.POST, PRIVATE_POST_ENDPOINT)
-                .hasAnyAuthority(Role.USER.toString())
+                .hasAnyAuthority(Role.USER.toString(), Role.ADMIN.toString())
+                .requestMatchers(HttpMethod.POST, PRIVATE_ADMIN_POST_ENDPOINT)
+                .hasAuthority(Role.ADMIN.toString())
+                .requestMatchers(HttpMethod.PUT, PRIVATE_ADMIN_PUT_ENDPOINT)
+                .hasAuthority(Role.ADMIN.toString())
+                .requestMatchers(HttpMethod.DELETE, PRIVATE_ADMIN_DELETE_ENDPOINT)
+                .hasAuthority(Role.ADMIN.toString())
                 .requestMatchers(SWAGGER_WHITELIST)
                 .permitAll()
                 .anyRequest()

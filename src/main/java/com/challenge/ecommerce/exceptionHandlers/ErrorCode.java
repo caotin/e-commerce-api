@@ -19,13 +19,14 @@ public enum ErrorCode {
   CONFIRM_PASSWORD_CANNOT_BE_NULL("Confirm password cannot be null", HttpStatus.BAD_REQUEST),
   CONFIRM_PASSWORD_NOT_MATCH(
       "Confirm password does not match, please try again", HttpStatus.BAD_REQUEST),
+  SELF_EMAIL_DUPLICATION("Cannot use your own email", HttpStatus.BAD_REQUEST),
+  SELF_NAME_DUPLICATION("Cannot use your own name", HttpStatus.BAD_REQUEST),
   EMAIL_EXISTED("Email already existed", HttpStatus.BAD_REQUEST),
   PASSWORD_SHOULD_NOT_MATCH_OLD(
       "New password should not be the same as the old password", HttpStatus.BAD_REQUEST),
   // another error
   URL_NOT_EXIST("The requested URL does not exist.", HttpStatus.NOT_FOUND),
   PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST),
-  //  REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED),
   CATEGORY_EXISTED("Category name already existed", HttpStatus.BAD_REQUEST),
   CATEGORY_NOT_FOUND("Category not found", HttpStatus.NOT_FOUND),
   SET_IMAGE_NOT_SUCCESS("Failed to upload category image", HttpStatus.BAD_REQUEST),

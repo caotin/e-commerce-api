@@ -3,7 +3,6 @@ package com.challenge.ecommerce.configs.security;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.utils.ApiResponse;
-import com.challenge.ecommerce.utils.componets.ResponseAuthenticated;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
