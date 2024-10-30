@@ -19,6 +19,8 @@ public enum ErrorCode {
   CONFIRM_PASSWORD_CANNOT_BE_NULL("Confirm password cannot be null", HttpStatus.BAD_REQUEST),
   CONFIRM_PASSWORD_NOT_MATCH(
       "Confirm password does not match, please try again", HttpStatus.BAD_REQUEST),
+  SELF_EMAIL_DUPLICATION("Cannot use your own email", HttpStatus.BAD_REQUEST),
+  SELF_NAME_DUPLICATION("Cannot use your own name", HttpStatus.BAD_REQUEST),
   EMAIL_EXISTED("Email already existed", HttpStatus.BAD_REQUEST),
   PASSWORD_SHOULD_NOT_MATCH_OLD(
       "New password should not be the same as the old password", HttpStatus.BAD_REQUEST),

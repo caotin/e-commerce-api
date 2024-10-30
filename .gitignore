@@ -39,7 +39,7 @@ build/
 # Exclude .yaml files
 *.yaml
 
-# Exclude .value.env files
+# Exclude .env files
 *.env
 
 # Exclude application.properties files

@@ -63,23 +63,26 @@ public class UserService implements IUserServices {
     var user = userMapper.adminCreateUserDtoToEntity(adminCreateUserRequest);
     user.setPassword(passwordEncoder.encode(adminCreateUserRequest.getNewPassword()));
     user.setName("user_" + UUID.randomUUID().toString().substring(0, 8));
-    if (adminCreateUserRequest.getRole().equals(Role.ADMIN.toString())) {
-      user.setRole(Role.ADMIN);
-    } else {
-      user.setRole(Role.USER);
-    }
+    user.setRole(
+        adminCreateUserRequest.getRole().equals(Role.ADMIN.toString()) ? Role.ADMIN : Role.USER);
     return ApiResponse.<Void>builder().message(ResponseStatus.SUCCESS_SIGNUP.getMessage()).build();
   }
 
   @Override
   @Transactional
   public ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.getName() != null) checkNameUnique(userUpdateRequest.getName());
-    if (userUpdateRequest.getEmail() != null) checkEmailUnique(userUpdateRequest.getEmail());
     var oldUser =
         userRepository
             .findByEmail(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+    if (userUpdateRequest.getName() != null) {
+      checkRepeatName(userUpdateRequest.getName(), oldUser.getName());
+      checkNameUnique(userUpdateRequest.getName());
+    }
+    if (userUpdateRequest.getEmail() != null) {
+      checkRepeatEmail(userUpdateRequest.getEmail(), oldUser.getEmail());
+      checkEmailUnique(userUpdateRequest.getEmail());
+    }
     var user = userMapper.userUpdateDtoToEntity(oldUser, userUpdateRequest);
     // check update password when password not null .
     if (userUpdateRequest.getOldPassword() != null) {
@@ -119,15 +122,24 @@ public class UserService implements IUserServices {
   @Transactional
   public ApiResponse<Void> adminUpdateUserDetail(
       AdminUpdateUserRequest adminUpdateUserRequest, String userId) {
-    if (adminUpdateUserRequest.getName() != null) checkNameUnique(adminUpdateUserRequest.getName());
-    if (adminUpdateUserRequest.getEmail() != null)
-      checkEmailUnique(adminUpdateUserRequest.getEmail());
     var oldUser =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+    if (adminUpdateUserRequest.getName() != null) {
+      checkRepeatName(adminUpdateUserRequest.getName(), oldUser.getName());
+      checkNameUnique(adminUpdateUserRequest.getName());
+    }
+    if (adminUpdateUserRequest.getEmail() != null) {
+      checkRepeatEmail(adminUpdateUserRequest.getEmail(), oldUser.getEmail());
+      checkEmailUnique(adminUpdateUserRequest.getEmail());
+    }
+
     // check update password when password not null .
     if (adminUpdateUserRequest.getNewPassword() != null) {
+      if (passwordEncoder.matches(adminUpdateUserRequest.getNewPassword(), oldUser.getPassword())) {
+        throw new CustomRuntimeException(ErrorCode.PASSWORD_SHOULD_NOT_MATCH_OLD);
+      }
       if (adminUpdateUserRequest.getConfirmPassword() == null)
         throw new CustomRuntimeException(ErrorCode.CONFIRM_PASSWORD_CANNOT_BE_NULL);
       checkPasswordConfirm(
@@ -167,6 +179,18 @@ public class UserService implements IUserServices {
   private void checkEmailUnique(String email) {
     if (userRepository.existsByEmail(email)) {
       throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
+    }
+  }
+
+  private void checkRepeatEmail(String newEmail, String oldEmail) {
+    if (newEmail.equals(oldEmail)) {
+      throw new CustomRuntimeException(ErrorCode.SELF_EMAIL_DUPLICATION);
+    }
+  }
+
+  private void checkRepeatName(String newName, String oldName) {
+    if (newName.equals(oldName)) {
+      throw new CustomRuntimeException(ErrorCode.SELF_NAME_DUPLICATION);
     }
   }
 
