@@ -1,5 +1,6 @@
 package com.challenge.ecommerce.configs;
 
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Value;
