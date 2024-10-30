@@ -33,12 +33,13 @@ public class OptionValueServiceImpl implements IOptionValueService {
             .findByIdAndDeletedAt(optionId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
 
+    var existingNames =
+        optionValueRepository.findAllValueNamesByOptionAndDeletedAtIsNull(option.getId());
     List<OptionValueEntity> valueEntities =
         request.getOptionValues().stream()
             .map(
                 child -> {
-                  if (optionValueRepository.existsByOptionValueNameAndDeletedAtIsNull(
-                      child.getValueName())) {
+                  if (existingNames.contains(child.getValueName())) {
                     throw new CustomRuntimeException(ErrorCode.OPTION_VALUE_NAME_EXISTED);
                   }
                   OptionValueEntity valueEntity = new OptionValueEntity();

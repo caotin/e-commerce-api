@@ -25,7 +25,7 @@ public enum ErrorCode {
   // another error
   URL_NOT_EXIST("The requested URL does not exist.", HttpStatus.NOT_FOUND),
   PAGE_SIZE_POSITIVE("The page size must be greater than 0", HttpStatus.BAD_REQUEST),
-//  REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED),
+  //  REFRESH_TOKEN_INVALID("Refresh token is invalid or expired.", HttpStatus.UNAUTHORIZED),
   CATEGORY_EXISTED("Category name already existed", HttpStatus.BAD_REQUEST),
   CATEGORY_NOT_FOUND("Category not found", HttpStatus.NOT_FOUND),
   SET_IMAGE_NOT_SUCCESS("Failed to upload category image", HttpStatus.BAD_REQUEST),
@@ -42,7 +42,7 @@ public enum ErrorCode {
       "category is creating a ParentCategory that is a child of that category",
       HttpStatus.BAD_REQUEST),
   OPTION_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
-  OPTION_VALUE_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
+  OPTION_VALUE_NAME_EXISTED("Option value name already existed", HttpStatus.BAD_REQUEST),
   OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
   ;
 
