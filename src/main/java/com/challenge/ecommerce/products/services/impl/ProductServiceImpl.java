@@ -3,17 +3,13 @@ package com.challenge.ecommerce.products.services.impl;
 import com.challenge.ecommerce.categories.repositories.CategoryRepository;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
-import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
-import com.challenge.ecommerce.products.controllers.dto.ProductImageCreateDto;
-import com.challenge.ecommerce.products.controllers.dto.ProductImageResponse;
-import com.challenge.ecommerce.products.controllers.dto.ProductResponse;
+import com.challenge.ecommerce.products.controllers.dto.*;
 import com.challenge.ecommerce.products.mappers.IImageMapper;
 import com.challenge.ecommerce.products.mappers.IProductMapper;
-import com.challenge.ecommerce.products.models.ImageEntity;
-import com.challenge.ecommerce.products.models.ProductEntity;
-import com.challenge.ecommerce.products.repositories.ImageRepository;
-import com.challenge.ecommerce.products.repositories.ProductRepository;
-import com.challenge.ecommerce.products.services.IProductService;
+import com.challenge.ecommerce.products.mappers.IVariantMapper;
+import com.challenge.ecommerce.products.models.*;
+import com.challenge.ecommerce.products.repositories.*;
+import com.challenge.ecommerce.products.services.*;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.StringHelper;
 import jakarta.persistence.criteria.Predicate;
@@ -39,6 +35,11 @@ public class ProductServiceImpl implements IProductService {
   ProductRepository productRepository;
   ImageRepository imageRepository;
   IImageMapper imageMapper;
+  IImageService imageService;
+  IVariantService variantService;
+  IProductOptionService productOptionService;
+  IProductOptionValueService productOptionValueService;
+  IVariantMapper variantMapper;
 
   @Transactional
   @Override
@@ -52,20 +53,39 @@ public class ProductServiceImpl implements IProductService {
     // set slug
     var slug = StringHelper.toSlug(request.getTitle());
     product.setSlug(slug);
+
+    var title = StringHelper.changeFirstCharacterCase(request.getTitle());
+    if (productRepository.existsByTitleAndDeletedAtIsNull(title)) {
+      throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
+    }
+    product.setTitle(title);
     productRepository.save(product);
 
     // Save list images
-    saveImage(request.getImages(), product);
+    imageService.saveImage(request.getImages(), product);
+
+    // set variants
+    var variant = variantService.addProductVariant(request, product);
 
     // set option
+    productOptionService.addProductOption(request, product);
 
     // set option value
+    productOptionValueService.addProductOptionValue(request, product, variant);
 
     var resp = mapper.productEntityToDto(product);
 
     // set total fields
     setTotal(resp, product);
     setListImage(resp, product);
+
+    // set variant
+    var variantRsp = variantMapper.variantEntityToShortDto(variant);
+    //add variant value
+    List<VariantShortResponse> variantShortResponses = new ArrayList<>();
+    variantShortResponses.add(variantRsp);
+    resp.setVariants(variantShortResponses);
+    // set review
     return resp;
   }
 
@@ -124,21 +144,6 @@ public class ProductServiceImpl implements IProductService {
     List<ProductImageResponse> response =
         listImages.stream().map(imageMapper::imageEntityToDto).toList();
     resp.setImages(response);
-  }
-
-  void saveImage(List<ProductImageCreateDto> list, ProductEntity product) {
-    List<ImageEntity> imageEntities =
-        list.stream()
-            .map(
-                child -> {
-                  ImageEntity imageEntity = new ImageEntity();
-                  imageEntity.setImages_url(child.getImages_url());
-                  imageEntity.setType_image(child.getType_image());
-                  imageEntity.setProduct(product);
-                  return imageEntity;
-                })
-            .toList();
-    imageRepository.saveAll(imageEntities);
   }
 
   void setTotal(ProductResponse resp, ProductEntity product) {

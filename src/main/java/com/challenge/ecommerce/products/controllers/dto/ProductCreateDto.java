@@ -1,10 +1,12 @@
 package com.challenge.ecommerce.products.controllers.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -31,14 +33,16 @@ public class ProductCreateDto {
 
   @NotNull(message = "Stock quantity must not be null")
   @Min(value = 0, message = "Stock quantity must be non-negative")
-  Integer stockQuantity;
+  Integer stock_quantity;
 
-  @NotBlank(message = "Option Id must not be null")
-  String optionId;
+  @NotBlank(message = "Sku Id must not be null")
+  String sku_id;
 
-  @NotBlank(message = "Value Id must not be null")
-  String valueId;
+  @NotEmpty(message = "Option list cannot be empty")
+  @Valid
+  List<ProductOptionCreateDto> options = new ArrayList<>();
 
   @NotEmpty(message = "Images list cannot be empty")
+  @Valid
   List<ProductImageCreateDto> images;
 }

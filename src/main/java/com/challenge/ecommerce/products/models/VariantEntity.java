@@ -24,7 +24,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 public class VariantEntity extends BaseEntity {
 
-    @Column(nullable = false, unique = true, columnDefinition = "VARCHAR(100)")
+    @Column(nullable = false, columnDefinition = "VARCHAR(100)")
     String sku_id;
 
     @Column(nullable = false)
