@@ -4,9 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -14,11 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VariantShortResponse {
-  String id;
+public class VariantCreateDto {
   String sku_id;
   Integer stock_quantity;
   BigDecimal price;
-  LocalDateTime createdAt;
-  List<OptionResponse> options = new ArrayList<>();
 }

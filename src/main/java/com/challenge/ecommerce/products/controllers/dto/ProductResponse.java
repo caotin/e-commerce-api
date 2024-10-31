@@ -37,7 +37,7 @@ public class ProductResponse {
 
   List<ProductImageResponse> images = new ArrayList<>();
 
-  // List<ReviewResponse> reviews = new ArrayList<>();;
+  // List<ReviewResponse> reviews = new ArrayList<>();
 
-  VariantShortResponse variants;
+  List<VariantShortResponse> variants = new ArrayList<>();
 }
