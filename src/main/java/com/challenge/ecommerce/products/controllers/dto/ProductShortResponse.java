@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -35,5 +36,5 @@ public class ProductShortResponse {
 
   List<ProductImageResponse> images;
 
-  VariantShortResponse variants;
+  List<VariantShortResponse> variants = new ArrayList<>();
 }

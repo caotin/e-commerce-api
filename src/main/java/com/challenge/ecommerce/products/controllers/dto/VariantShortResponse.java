@@ -20,5 +20,5 @@ public class VariantShortResponse {
   Integer stock_quantity;
   BigDecimal price;
   LocalDateTime createdAt;
-  List<OptionResponse> options = new ArrayList<>();
+  @Builder.Default List<OptionResponse> options = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
 package com.challenge.ecommerce.products.controllers.dto;
 
+import com.challenge.ecommerce.utils.enums.TypeImage;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,5 +13,5 @@ import lombok.experimental.FieldDefaults;
 public class ProductImageResponse {
   String id;
   String images_url;
-  String type_image;
+  TypeImage type_image;
 }

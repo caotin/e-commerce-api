@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface ImageRepository extends JpaRepository<ImageEntity, String> {
   @Query("SELECT b FROM images b WHERE b.product.id =:id AND b.deletedAt IS NULL")
-  List<ImageEntity> findByIdProductAndDeletedAt(@Param("id") String id);
+  List<ImageEntity> findByIdProductAndDeletedAtIsNull(@Param("id") String id);
 }

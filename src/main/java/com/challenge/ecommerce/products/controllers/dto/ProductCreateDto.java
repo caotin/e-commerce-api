@@ -44,5 +44,5 @@ public class ProductCreateDto {
 
   @NotEmpty(message = "Images list cannot be empty")
   @Valid
-  List<ProductImageCreateDto> images;
+  List<ProductImageCreateDto> images = new ArrayList<>();
 }

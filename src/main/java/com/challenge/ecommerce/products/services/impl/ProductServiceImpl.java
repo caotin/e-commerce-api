@@ -4,9 +4,7 @@ import com.challenge.ecommerce.categories.repositories.CategoryRepository;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.products.controllers.dto.*;
-import com.challenge.ecommerce.products.mappers.IImageMapper;
-import com.challenge.ecommerce.products.mappers.IProductMapper;
-import com.challenge.ecommerce.products.mappers.IVariantMapper;
+import com.challenge.ecommerce.products.mappers.*;
 import com.challenge.ecommerce.products.models.*;
 import com.challenge.ecommerce.products.repositories.*;
 import com.challenge.ecommerce.products.services.*;
@@ -24,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -40,6 +40,10 @@ public class ProductServiceImpl implements IProductService {
   IProductOptionService productOptionService;
   IProductOptionValueService productOptionValueService;
   IVariantMapper variantMapper;
+  ProductOptionRepository productOptionRepository;
+  IOptionMapper optionMapper;
+  VariantValueRepository variantValueRepository;
+  IOptionValueMapper optionValueMapper;
 
   @Transactional
   @Override
@@ -81,7 +85,7 @@ public class ProductServiceImpl implements IProductService {
 
     // set variant
     var variantRsp = variantMapper.variantEntityToShortDto(variant);
-    //add variant value
+    // add variant value
     List<VariantShortResponse> variantShortResponses = new ArrayList<>();
     variantShortResponses.add(variantRsp);
     resp.setVariants(variantShortResponses);
@@ -126,6 +130,19 @@ public class ProductServiceImpl implements IProductService {
                 product -> {
                   var response = mapper.productEntityToDto(product);
                   setListImage(response, product);
+
+                  List<VariantShortResponse> variants =
+                      product.getVariants().stream()
+                          .map(
+                              variant -> {
+                                var variantResponse =
+                                    variantMapper.variantEntityToShortDto(variant);
+                                setListProductOption(variantResponse, product);
+                                return variantResponse;
+                              })
+                          .toList();
+                  response.setVariants(variants);
+
                   return response;
                 })
             .toList();
@@ -140,7 +157,7 @@ public class ProductServiceImpl implements IProductService {
   }
 
   void setListImage(ProductResponse resp, ProductEntity product) {
-    var listImages = imageRepository.findByIdProductAndDeletedAt(product.getId());
+    var listImages = imageRepository.findByIdProductAndDeletedAtIsNull(product.getId());
     List<ProductImageResponse> response =
         listImages.stream().map(imageMapper::imageEntityToDto).toList();
     resp.setImages(response);
@@ -158,5 +175,30 @@ public class ProductServiceImpl implements IProductService {
     // set total sold
     var totalSold = 0;
     resp.setTotalSold(totalSold);
+  }
+
+  void setListProductOption(VariantShortResponse resp, ProductEntity product) {
+    var options = productOptionRepository.findByProductIDAndDeleteAtIsNull(product.getId());
+    List<OptionResponse> optionResponses =
+        options.stream()
+            .map(
+                option -> {
+                  var optionResp = optionMapper.optionEntityToDto(option);
+                  setListOptionValue(optionResp, product, resp);
+                  return optionResp;
+                })
+            .toList();
+
+    resp.setOptions(optionResponses);
+  }
+
+  void setListOptionValue(
+      OptionResponse resp, ProductEntity product, VariantShortResponse variant) {
+    var optionValues =
+        variantValueRepository.findByVariantIdAndOptionIdAndDeletedAtIsNull(
+            variant.getId(), resp.getId());
+    List<OptionValueResponse> optionValueResponses =
+        optionValues.stream().map(optionValueMapper::optionValueEntityToDto).toList();
+    resp.setOptionValues(optionValueResponses);
   }
 }
