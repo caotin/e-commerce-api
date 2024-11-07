@@ -45,6 +45,13 @@ public enum ErrorCode {
   OPTION_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
   OPTION_VALUE_NAME_EXISTED("Option value name already existed", HttpStatus.BAD_REQUEST),
   OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
+  // Products
+  MIN_PRICE_GREATER_MAX_PRICE("maxPrice must be greater than minPrice", HttpStatus.BAD_REQUEST),
+  SKU_ID_EXISTED("Sku id already existed", HttpStatus.BAD_REQUEST),
+  OPTION_VALUE_NOT_FOUND("Option value not found", HttpStatus.BAD_REQUEST),
+  VARIANT_NOT_FOUND("Variant not found", HttpStatus.NOT_FOUND),
+  PRODUCT_NAME_EXISTED("Product name already existed", HttpStatus.BAD_REQUEST),
+  INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
