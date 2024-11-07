@@ -19,4 +19,9 @@ public class StringHelper {
     input = Character.toUpperCase(input.charAt(0)) + input.substring(1);
     return input;
   }
+
+  public static boolean isValidImageUrl(String url) {
+    String regex = ".*\\.(jpg|jpeg|png|gif|bmp|webp)$";
+    return url != null && url.toLowerCase().matches(regex);
+  }
 }

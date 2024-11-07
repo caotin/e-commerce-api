@@ -51,6 +51,7 @@ public enum ErrorCode {
   OPTION_VALUE_NOT_FOUND("Option value not found", HttpStatus.BAD_REQUEST),
   VARIANT_NOT_FOUND("Variant not found", HttpStatus.NOT_FOUND),
   PRODUCT_NAME_EXISTED("Product name already existed", HttpStatus.BAD_REQUEST),
+  INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
