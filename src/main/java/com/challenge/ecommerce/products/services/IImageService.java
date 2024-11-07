@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface IImageService {
   void saveImage(List<ProductImageCreateDto> list, ProductEntity product);
+
+  void updateImage(List<ProductImageCreateDto> list, ProductEntity product);
 }

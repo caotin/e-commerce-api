@@ -13,6 +13,6 @@ public interface VariantRepository extends JpaRepository<VariantEntity, String> 
   @Query("SELECT COUNT(c) > 0 FROM variants c WHERE c.sku_id = :skuId AND c.deletedAt IS NULL")
   Boolean existsBySkuIdAndDeletedAtIsNull(@Param("skuId") String skuId);
 
-  @Query("SELECT b FROM variants b WHERE b.product.id =: productId AND b.deletedAt IS NULL")
+  @Query("SELECT b FROM variants b WHERE b.product.id =:productId AND b.deletedAt IS NULL")
   Optional<VariantEntity> findByProductIDAndDeletedAtIsNull(@Param("productId") String productId);
 }

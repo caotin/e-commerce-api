@@ -6,8 +6,11 @@ import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.models.ProductEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface IProductMapper {
   ProductEntity productCreateDtoToEntity(ProductCreateDto request);
 

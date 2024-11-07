@@ -52,6 +52,8 @@ public enum ErrorCode {
   VARIANT_NOT_FOUND("Variant not found", HttpStatus.NOT_FOUND),
   PRODUCT_NAME_EXISTED("Product name already existed", HttpStatus.BAD_REQUEST),
   INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
+  PRODUCT_NOT_FOUND("Product not found", HttpStatus.NOT_FOUND),
+  DESCRIPTION_CANNOT_BE_NULL("Description cannot be null", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
