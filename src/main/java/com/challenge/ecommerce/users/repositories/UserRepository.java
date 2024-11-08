@@ -21,7 +21,7 @@ public interface UserRepository
   boolean findActiveUserEmails(@Param(value = "email") String email);
 
   @Query(
-      "select case when count(u) > 0 then true else false end from users u where u.deletedAt is  null and u.email = :name")
+      "select case when count(u) > 0 then true else false end from users u where u.deletedAt is  null and u.name = :name")
   boolean findActiveUserName(@Param(value = "name") String name);
 
   Page<UserEntity> findAllByDeletedAtIsNull(Pageable pageable);
