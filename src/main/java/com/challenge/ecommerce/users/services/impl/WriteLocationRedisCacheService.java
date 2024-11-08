@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class writeLocationRedisCacheService {
+public class WriteLocationRedisCacheService {
   LocationApiService locationApiService;
   RedisTemplate<String, Object> redisTemplate;
 
@@ -44,7 +44,7 @@ public class writeLocationRedisCacheService {
                           redisTemplate
                               .opsForHash()
                               .put(
-                                  "wards" + district.getCode(),
+                                  "wards:" + district.getCode(),
                                   String.valueOf(ward.getCode()),
                                   ward.getName()));
                 });

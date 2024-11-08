@@ -54,7 +54,7 @@ public class LocationService implements ILocationService {
   @Override
   public ApiResponse<List<BaseLocation>> getWardsByDistrictId(int districtCode) {
     var result = new ArrayList<BaseLocation>();
-    var locationMap = redisTemplate.opsForHash().entries("wards" + districtCode);
+    var locationMap = redisTemplate.opsForHash().entries("wards:" + districtCode);
     if (locationMap.isEmpty()) {
       throw new CustomRuntimeException(ErrorCode.DISTRICT_NOT_FOUND);
     }
