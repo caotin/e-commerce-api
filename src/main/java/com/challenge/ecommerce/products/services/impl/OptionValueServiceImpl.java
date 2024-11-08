@@ -30,7 +30,7 @@ public class OptionValueServiceImpl implements IOptionValueService {
   public OptionResponse addOptionValue(String optionId, OptionValueCreateDto request) {
     var option =
         optionRepository
-            .findByIdAndDeletedAt(optionId)
+            .findByIdAndDeletedAtIsNull(optionId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
 
     var existingNames =

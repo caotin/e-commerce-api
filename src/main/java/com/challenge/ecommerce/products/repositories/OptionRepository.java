@@ -14,5 +14,5 @@ public interface OptionRepository extends JpaRepository<OptionEntity, String> {
   Boolean existsByOptionNameAndDeletedAtIsNull(@Param("name") String name);
 
   @Query("SELECT b FROM options b WHERE b.id = :optionId AND b.deletedAt IS NULL")
-  Optional<OptionEntity> findByIdAndDeletedAt(@Param("optionId") String optionId);
+  Optional<OptionEntity> findByIdAndDeletedAtIsNull(@Param("optionId") String optionId);
 }

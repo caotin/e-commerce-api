@@ -62,7 +62,7 @@ public class CategoryServiceImpl implements ICategoryService {
             .map(
                 category -> {
                   var resp = mapper.categoryEntityToDto(category);
-                  SetListCategoryParent(resp, category);
+                  setListCategoryParent(resp, category);
                   return resp;
                 })
             .toList();
@@ -88,7 +88,7 @@ public class CategoryServiceImpl implements ICategoryService {
           categoryRepository.findByIdAndDeletedAt(category.getParentCategory().getId());
       resp.setParentCategory(mapper.categoryEntityToParentDto(parentCategory.get()));
     }
-    SetListCategoryParent(resp, category);
+    setListCategoryParent(resp, category);
     return resp;
   }
 
@@ -123,7 +123,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
     categoryRepository.save(newCategory);
     var resp = mapper.categoryEntityToDto(newCategory);
-    SetListCategoryParent(resp, newCategory);
+    setListCategoryParent(resp, newCategory);
     return resp;
   }
 
@@ -157,7 +157,7 @@ public class CategoryServiceImpl implements ICategoryService {
         .build();
   }
 
-  void SetListCategoryParent(CategoryResponse resp, CategoryEntity newCategory) {
+  void setListCategoryParent(CategoryResponse resp, CategoryEntity newCategory) {
     if (newCategory.getChildCategories() != null) {
       var listCategoryParent = categoryRepository.findByParentIdAndDeletedAt(newCategory.getId());
       List<CategoryResponse> categoryResponses =

@@ -14,4 +14,14 @@ public class StringHelper {
     String slug = NONLATIN.matcher(normalized).replaceAll("");
     return slug.toLowerCase(Locale.ENGLISH);
   }
+
+  public static String changeFirstCharacterCase(String input) {
+    input = Character.toUpperCase(input.charAt(0)) + input.substring(1);
+    return input;
+  }
+
+  public static boolean isValidImageUrl(String url) {
+    String regex = ".*\\.(jpg|jpeg|png|gif|bmp|webp)$";
+    return url != null && url.toLowerCase().matches(regex);
+  }
 }

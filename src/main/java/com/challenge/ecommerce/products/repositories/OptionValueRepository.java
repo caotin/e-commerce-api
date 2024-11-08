@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OptionValueRepository extends JpaRepository<OptionValueEntity, String> {
@@ -17,4 +18,7 @@ public interface OptionValueRepository extends JpaRepository<OptionValueEntity, 
   @Query(
       "SELECT b.value_name FROM option_values b WHERE b.option.id =:optionId AND b.deletedAt IS NULL")
   List<String> findAllValueNamesByOptionAndDeletedAtIsNull(@Param("optionId") String optionId);
+
+  @Query("SELECT b FROM option_values b WHERE b.id =:id AND b.deletedAt IS NULL")
+  Optional<OptionValueEntity> findByIdAndDeletedAtIsNull(@Param("id") String id);
 }
