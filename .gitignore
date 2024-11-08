@@ -39,6 +39,9 @@ build/
 # Exclude .yaml files
 *.yaml
 
+# Exclude .rdb files
+*.rdb
+
 # Exclude .env files
 *.env
 

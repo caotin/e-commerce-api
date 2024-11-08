@@ -45,7 +45,8 @@ public enum ErrorCode {
   OPTION_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
   OPTION_VALUE_NAME_EXISTED("Option value name already existed", HttpStatus.BAD_REQUEST),
   OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
-  // Products
+  PROVINCE_NOT_FOUND("The province you selected does not exist", HttpStatus.BAD_REQUEST),
+  DISTRICT_NOT_FOUND("The district you selected does not exist", HttpStatus.BAD_REQUEST),
   MIN_PRICE_GREATER_MAX_PRICE("maxPrice must be greater than minPrice", HttpStatus.BAD_REQUEST),
   SKU_ID_EXISTED("Sku id already existed", HttpStatus.BAD_REQUEST),
   OPTION_VALUE_NOT_FOUND("Option value not found", HttpStatus.BAD_REQUEST),

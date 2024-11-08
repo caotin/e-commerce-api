@@ -31,9 +31,10 @@ public class SecurityConfig {
     "/api/auth/signup", "/api/auth/login", "/api/auth/refresh"
   };
   static final String[] PRIVATE_PUT_ENDPOINT = {"/api/users/me"};
-  static final String[] PRIVATE_GET_ENDPOINT = {"/api/users/me"};
+  static final String[] PRIVATE_GET_ENDPOINT = {"/api/users/me", "/api/location/**"};
   static final String[] PRIVATE_ADMIN_POST_ENDPOINT = {"/api/users/register"};
   static final String[] PRIVATE_ADMIN_PUT_ENDPOINT = {"/api/users/*"};
+  static final String[] PRIVATE_ADMIN_GET_ENDPOINT = {"/api/users/*"};
   static final String[] PRIVATE_ADMIN_DELETE_ENDPOINT = {"/api/users"};
 
   static final String[] SWAGGER_WHITELIST = {
@@ -56,6 +57,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, PRIVATE_ADMIN_PUT_ENDPOINT)
                 .hasAuthority(Role.ADMIN.toString())
                 .requestMatchers(HttpMethod.DELETE, PRIVATE_ADMIN_DELETE_ENDPOINT)
+                .hasAuthority(Role.ADMIN.toString())
+                .requestMatchers(HttpMethod.GET, PRIVATE_ADMIN_GET_ENDPOINT)
                 .hasAuthority(Role.ADMIN.toString())
                 .requestMatchers(SWAGGER_WHITELIST)
                 .permitAll()
