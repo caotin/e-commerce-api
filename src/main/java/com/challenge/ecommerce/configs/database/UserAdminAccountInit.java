@@ -36,7 +36,7 @@ public class UserAdminAccountInit {
   ApplicationRunner applicationRunner(UserRepository userRepository) {
     log.info("Initializing application.....");
     return args -> {
-      if (!userRepository.existsByEmail(ADMIN_EMAIL)) {
+      if (!userRepository.findActiveUserEmails(ADMIN_EMAIL)) {
         UserEntity user =
             UserEntity.builder()
                 .name(ADMIN_USER_NAME)

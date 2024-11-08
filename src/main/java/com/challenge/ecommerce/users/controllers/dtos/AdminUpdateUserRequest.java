@@ -2,7 +2,6 @@ package com.challenge.ecommerce.users.controllers.dtos;
 
 import com.challenge.ecommerce.utils.components.customannotation.AllowedImageFileType;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -31,10 +30,7 @@ public class AdminUpdateUserRequest {
   @Email(message = "Invalid email format")
   String email;
 
-  @Size(min = 6, message = "username length must be 6")
-  @Pattern(
-      regexp = "^[a-zA-Z0-9]+$",
-      message = "name must not contain special characters or accented characters")
+  @Size(min = 6, max = 100, message = "username length must be 6 -> 100 ")
   String name;
 
   @Pattern(regexp = "USER|ADMIN", message = "Role must be either 'USER' or 'ADMIN' !")

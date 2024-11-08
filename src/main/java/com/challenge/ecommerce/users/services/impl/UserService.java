@@ -8,6 +8,7 @@ import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.users.controllers.dtos.*;
 import com.challenge.ecommerce.users.mappers.IUserMapper;
 import com.challenge.ecommerce.users.repositories.UserRepository;
+import com.challenge.ecommerce.users.repositories.spec.UsersSpecification;
 import com.challenge.ecommerce.users.services.IUserServices;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.AuthUtils;
@@ -16,12 +17,14 @@ import com.challenge.ecommerce.utils.enums.Role;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -75,7 +78,7 @@ public class UserService implements IUserServices {
         userRepository
             .findByEmail(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
-    if (userUpdateRequest.getName() != null) {
+    if (userUpdateRequest.getName() != null && !userUpdateRequest.getName().trim().isEmpty()) {
       checkRepeatName(userUpdateRequest.getName(), oldUser.getName());
       checkNameUnique(userUpdateRequest.getName());
     }
@@ -126,7 +129,8 @@ public class UserService implements IUserServices {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
-    if (adminUpdateUserRequest.getName() != null) {
+    if (adminUpdateUserRequest.getName() != null
+        && !adminUpdateUserRequest.getName().trim().isEmpty()) {
       checkRepeatName(adminUpdateUserRequest.getName(), oldUser.getName());
       checkNameUnique(adminUpdateUserRequest.getName());
     }
@@ -175,9 +179,28 @@ public class UserService implements IUserServices {
         .build();
   }
 
+  @Override
+  public ApiResponse<List<UserGetResponse>> getAllUser(Pageable pageable, String name) {
+    var users =
+        (name != null)
+            ? userRepository.findAll(
+                Specification.where(UsersSpecification.hasName(name))
+                    .and(UsersSpecification.isNotDeleted()),
+                pageable)
+            : userRepository.findAllByDeletedAtIsNull(pageable);
+    var listUsers = users.stream().map(userMapper::userEntityToUserGetResponse).toList();
+    return ApiResponse.<List<UserGetResponse>>builder()
+        .limit(users.getNumberOfElements())
+        .page(pageable.getPageNumber())
+        .total(users.getTotalElements())
+        .totalPages(users.getTotalPages())
+        .result(listUsers)
+        .build();
+  }
+
   // check email unique .
   private void checkEmailUnique(String email) {
-    if (userRepository.existsByEmail(email)) {
+    if (userRepository.findActiveUserEmails(email)) {
       throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
     }
   }
@@ -196,7 +219,7 @@ public class UserService implements IUserServices {
 
   // check user name unique .
   private void checkNameUnique(String name) {
-    if (userRepository.existsByName(name)) {
+    if (userRepository.findActiveUserName(name)) {
       throw new CustomRuntimeException(ErrorCode.USERNAME_ALREADY_EXISTS);
     }
   }

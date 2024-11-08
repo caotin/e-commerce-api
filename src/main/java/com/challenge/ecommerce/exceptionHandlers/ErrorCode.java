@@ -45,7 +45,8 @@ public enum ErrorCode {
   OPTION_NAME_EXISTED("Option name already existed", HttpStatus.BAD_REQUEST),
   OPTION_VALUE_NAME_EXISTED("Option value name already existed", HttpStatus.BAD_REQUEST),
   OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
-  ;
+  PROVINCE_NOT_FOUND("The province you selected does not exist", HttpStatus.BAD_REQUEST),
+  DISTRICT_NOT_FOUND("The district you selected does not exist", HttpStatus.BAD_REQUEST);
 
   private final String message;
   private final HttpStatus statusCode;
