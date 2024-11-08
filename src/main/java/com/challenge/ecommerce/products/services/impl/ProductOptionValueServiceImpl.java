@@ -46,6 +46,11 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
             optionValueRepository
                 .findByIdAndDeletedAtIsNull(valueCreateDto.getIdOptionValue())
                 .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
+
+        // check if optionValue is in option
+        if (!optionValue.getOption().getId().equals(option.getId())) {
+          throw new CustomRuntimeException(ErrorCode.INVALID_OPTION_VALUE_FOR_OPTION);
+        }
         VariantValueEntity entity = new VariantValueEntity();
         entity.setVariant(variant);
         entity.setOptionValue(optionValue);
@@ -63,22 +68,26 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
             variant.getId(), productOption.getOption().getId());
 
     for (ProductOptionValueCreateDto valueDto : optionDto.getOptionValues()) {
+      // check optionValue existed
+      var optionValue =
+          optionValueRepository
+              .findByIdAndDeletedAtIsNull(valueDto.getIdOptionValue())
+              .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
+      // check if optionValue is in option
+      if (!optionValue.getOption().getId().equals(productOption.getOption().getId())) {
+        throw new CustomRuntimeException(ErrorCode.INVALID_OPTION_VALUE_FOR_OPTION);
+      }
       VariantValueEntity variantValue =
           currentValues.stream()
               .filter(val -> val.getOptionValue().getId().equals(valueDto.getIdOptionValue()))
               .findFirst()
               .orElse(null);
-
       // If the optionValue does not exist, create a new one
       if (variantValue == null) {
-        var newOptionValue =
-            optionValueRepository
-                .findByIdAndDeletedAtIsNull(valueDto.getIdOptionValue())
-                .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
         VariantValueEntity newVariantValue = new VariantValueEntity();
         newVariantValue.setOption(productOption.getOption());
         newVariantValue.setVariant(variant);
-        newVariantValue.setOptionValue(newOptionValue);
+        newVariantValue.setOptionValue(optionValue);
         variantValueRepository.save(newVariantValue);
       }
     }

@@ -22,8 +22,8 @@ public interface ImageRepository extends JpaRepository<ImageEntity, String> {
 
   @Modifying
   @Transactional
-  @Query("UPDATE images b SET b.deletedAt=:date WHERE b.id =:id")
-  void deleteAvatarByProductId(@Param("id") String id, @Param("date") LocalDateTime date);
+  @Query("UPDATE images b SET b.deletedAt=:date WHERE b.id =:imageId")
+  void deleteAvatarByImageId(@Param("imageId") String imageId, @Param("date") LocalDateTime date);
 
   @Query(
       "SELECT b FROM images b WHERE b.product.id =:id AND b.type_image = 'THUMBNAIL' AND b.deletedAt IS NULL")

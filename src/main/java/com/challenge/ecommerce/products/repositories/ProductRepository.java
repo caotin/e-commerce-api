@@ -17,5 +17,5 @@ public interface ProductRepository
   Boolean existsByTitleAndDeletedAtIsNull(@Param("title") String title);
 
   @Query("SELECT b FROM products b WHERE b.slug=:productSlug AND b.deletedAt IS NULL")
-  Optional<ProductEntity> findBySlugAndCreatedAtIsNull(@Param("productSlug") String productSlug);
+  Optional<ProductEntity> findBySlugAndDeletedAtIsNull(@Param("productSlug") String productSlug);
 }

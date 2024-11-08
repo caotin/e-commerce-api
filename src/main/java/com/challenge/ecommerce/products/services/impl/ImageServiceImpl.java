@@ -14,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,10 @@ public class ImageServiceImpl implements IImageService {
 
   @Override
   public void saveImage(List<ProductImageCreateDto> list, ProductEntity product) {
+    // Collect and check requested avatar, thumbnail URLs
+    String newAvatarUrl = null;
+    Set<String> newThumbnailUrls = new HashSet<>();
+    collectUrlImages(list, newAvatarUrl, newThumbnailUrls);
     List<ImageEntity> imageEntities =
         list.stream()
             .map(
@@ -49,41 +56,80 @@ public class ImageServiceImpl implements IImageService {
     var productAvatar = imageRepository.findByIdProductAvatarAndDeletedAtIsNull(product.getId());
     var listProductThumbnail =
         imageRepository.findByIdProductThumbnailAndDeletedAtIsNull(product.getId());
-    List<ImageEntity> imageEntities =
-        list.stream()
-            .map(
-                child -> {
-                  ImageEntity imageEntity = new ImageEntity();
-                  if (!StringHelper.isValidImageUrl(child.getImages_url())) {
-                    throw new CustomRuntimeException(ErrorCode.INVALID_IMAGE_URL);
-                  }
-                  if (child.getType_image() == TypeImage.AVATAR) {
-                    if (productAvatar == null
-                        || !child.getImages_url().equals(productAvatar.getImages_url())) {
-                      if (productAvatar != null) {
-                        imageRepository.deleteAvatarByProductId(
-                            productAvatar.getId(), LocalDateTime.now());
-                      }
-                      imageEntity.setImages_url(child.getImages_url());
-                      imageEntity.setType_image(child.getType_image());
-                      imageEntity.setProduct(product);
-                    }
-                  } else if (child.getType_image() == TypeImage.THUMBNAIL) {
-                    if (isNewThumbnailImage(listProductThumbnail, child.getImages_url())) {
-                      imageEntity.setImages_url(child.getImages_url());
-                      imageEntity.setType_image(child.getType_image());
-                      imageEntity.setProduct(product);
-                    }
-                  }
-                  return imageEntity;
-                })
-            .filter(entity -> entity.getImages_url() != null) // Save if you have a new URL
-            .toList();
 
+    // Collect existing thumbnail URLs
+    Set<String> existingThumbnailUrls =
+        listProductThumbnail.stream().map(ImageEntity::getImages_url).collect(Collectors.toSet());
+
+    // Collect and check requested avatar, thumbnail URLs
+    String newAvatarUrl = null;
+    Set<String> newThumbnailUrls = new HashSet<>();
+    collectUrlImages(list, newAvatarUrl, newThumbnailUrls);
+
+    // Remove outdated thumbnails
+    for (ImageEntity existingThumbnail : listProductThumbnail) {
+      if (!newThumbnailUrls.contains(existingThumbnail.getImages_url())) {
+        removeThumbnailImage(existingThumbnail);
+      }
+    }
+
+    // Prepare list of new images to save
+    List<ImageEntity> imageEntities = new ArrayList<>();
+
+    // Check and update avatar if needed
+    if (productAvatar == null || !newAvatarUrl.equals(productAvatar.getImages_url())) {
+      if (productAvatar != null) {
+        imageRepository.deleteAvatarByImageId(productAvatar.getId(), LocalDateTime.now());
+      }
+      ImageEntity avatarImage = new ImageEntity();
+      avatarImage.setImages_url(newAvatarUrl);
+      avatarImage.setType_image(TypeImage.AVATAR);
+      avatarImage.setProduct(product);
+      imageEntities.add(avatarImage);
+    }
+
+    // Add new thumbnails that aren't already saved
+    for (String thumbnailUrl : newThumbnailUrls) {
+      if (!existingThumbnailUrls.contains(thumbnailUrl)) {
+        ImageEntity thumbnailImage = new ImageEntity();
+        thumbnailImage.setImages_url(thumbnailUrl);
+        thumbnailImage.setType_image(TypeImage.THUMBNAIL);
+        thumbnailImage.setProduct(product);
+        imageEntities.add(thumbnailImage);
+      }
+    }
+
+    // Save new images
     imageRepository.saveAll(imageEntities);
   }
 
-  private boolean isNewThumbnailImage(List<ImageEntity> thumbnails, String newUrl) {
-    return thumbnails.stream().noneMatch(thumbnail -> thumbnail.getImages_url().equals(newUrl));
+  // Method to soft-delete a thumbnail by setting `deletedAt`
+  void removeThumbnailImage(ImageEntity image) {
+    image.setDeletedAt(LocalDateTime.now());
+    imageRepository.save(image);
+  }
+
+  void collectUrlImages(
+      List<ProductImageCreateDto> list, String newAvatarUrl, Set<String> newThumbnailUrls) {
+    for (ProductImageCreateDto dto : list) {
+      if (dto.getType_image() == TypeImage.AVATAR) {
+        if (newAvatarUrl != null) {
+          throw new CustomRuntimeException(ErrorCode.AVATAR_PRODUCT_IMAGE_ONLY_ONE);
+        }
+        newAvatarUrl = dto.getImages_url();
+      } else if (dto.getType_image() == TypeImage.THUMBNAIL) {
+        newThumbnailUrls.add(dto.getImages_url());
+      }
+    }
+
+    // Avatar validations
+    if (newAvatarUrl == null) {
+      throw new CustomRuntimeException(ErrorCode.AVATAR_PRODUCT_CANNOT_BE_NULL);
+    }
+
+    // Thumbnail validations
+    if (newThumbnailUrls.isEmpty()) {
+      throw new CustomRuntimeException(ErrorCode.THUMBNAIL_PRODUCT_CANNOT_BE_NULL);
+    }
   }
 }

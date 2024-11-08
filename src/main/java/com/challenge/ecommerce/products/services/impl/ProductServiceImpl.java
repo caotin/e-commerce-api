@@ -148,7 +148,7 @@ public class ProductServiceImpl implements IProductService {
   public ProductResponse getProductBySlug(String productSlug) {
     var product =
         productRepository
-            .findBySlugAndCreatedAtIsNull(productSlug)
+            .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
     var resp = mapper.productEntityToDto(product);
     setListVariant(resp, product);
@@ -160,7 +160,7 @@ public class ProductServiceImpl implements IProductService {
   public ProductResponse updateProductBySlug(ProductUpdateDto request, String productSlug) {
     var oldProduct =
         productRepository
-            .findBySlugAndCreatedAtIsNull(productSlug)
+            .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
     var oldVariant =
         variantRepository
@@ -216,7 +216,7 @@ public class ProductServiceImpl implements IProductService {
   public void deleteProductBySlug(String productSlug) {
     var product =
         productRepository
-            .findBySlugAndCreatedAtIsNull(productSlug)
+            .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
     product.setDeletedAt(LocalDateTime.now());
     productRepository.save(product);
@@ -269,15 +269,17 @@ public class ProductServiceImpl implements IProductService {
   }
 
   void setListVariant(ProductResponse resp, ProductEntity product) {
-    List<VariantShortResponse> variants =
-        product.getVariants().stream()
-            .map(
-                variant -> {
-                  var variantResponse = variantMapper.variantEntityToShortDto(variant);
-                  setListProductOption(variantResponse, product);
-                  return variantResponse;
-                })
-            .toList();
-    resp.setVariants(variants);
+    if (product.getVariants() != null) {
+      List<VariantShortResponse> variants =
+          product.getVariants().stream()
+              .map(
+                  variant -> {
+                    var variantResponse = variantMapper.variantEntityToShortDto(variant);
+                    setListProductOption(variantResponse, product);
+                    return variantResponse;
+                  })
+              .toList();
+      resp.setVariants(variants);
+    }
   }
 }
