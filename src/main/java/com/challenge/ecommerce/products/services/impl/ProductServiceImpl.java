@@ -178,13 +178,14 @@ public class ProductServiceImpl implements IProductService {
     var description =
         request.getDescription() == null ? oldProduct.getDescription() : request.getDescription();
     // update tile and description
-    var title = StringHelper.changeFirstCharacterCase(request.getTitle());
-    if (productRepository.existsByTitleAndDeletedAtIsNull(title)
-        && !oldProduct.getTitle().equals(title)) {
+    var title = request.getTitle() == null ? oldProduct.getTitle() : request.getTitle();
+    var newTitle = StringHelper.changeFirstCharacterCase(title);
+    if (productRepository.existsByTitleAndDeletedAtIsNull(newTitle)
+        && !oldProduct.getTitle().equals(newTitle)) {
       throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
     }
-    newProduct.setTitle(title);
-    newProduct.setSlug(StringHelper.toSlug(title));
+    newProduct.setTitle(newTitle);
+    newProduct.setSlug(StringHelper.toSlug(newTitle));
     if (description.isBlank()) {
       throw new CustomRuntimeException(ErrorCode.DESCRIPTION_CANNOT_BE_NULL);
     }

@@ -16,8 +16,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateDto {
-  @NotBlank(message = "Product title cannot be blank")
-  @Size(min = 2, max = 60, message = "Product title must be between 2 and 60 characters")
+
   String title;
 
   String description;

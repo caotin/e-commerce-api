@@ -64,7 +64,7 @@ public class ImageServiceImpl implements IImageService {
     // Collect and check requested avatar, thumbnail URLs
     String newAvatarUrl = null;
     Set<String> newThumbnailUrls = new HashSet<>();
-    collectUrlImages(list, newAvatarUrl, newThumbnailUrls);
+    newAvatarUrl = collectUrlImages(list, newAvatarUrl, newThumbnailUrls);
 
     // Remove outdated thumbnails
     for (ImageEntity existingThumbnail : listProductThumbnail) {
@@ -109,7 +109,7 @@ public class ImageServiceImpl implements IImageService {
     imageRepository.save(image);
   }
 
-  void collectUrlImages(
+  String collectUrlImages(
       List<ProductImageCreateDto> list, String newAvatarUrl, Set<String> newThumbnailUrls) {
     for (ProductImageCreateDto dto : list) {
       if (dto.getType_image() == TypeImage.AVATAR) {
@@ -131,5 +131,6 @@ public class ImageServiceImpl implements IImageService {
     if (newThumbnailUrls.isEmpty()) {
       throw new CustomRuntimeException(ErrorCode.THUMBNAIL_PRODUCT_CANNOT_BE_NULL);
     }
+    return newAvatarUrl;
   }
 }
