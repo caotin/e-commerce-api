@@ -65,23 +65,30 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
     }
     var deliveryAddress =
         userDeliveryAddressRepository
-            .findById(deliveryAddressId)
+            .findDeliveryAddressActive(deliveryAddressId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND));
     if (request.getGuide_position() != null) {
       deliveryAddress.setGuide_position(request.getGuide_position());
     }
 
     if (request.getProvinceCode() != null
-        && request.getDistrictCode() != null
-        && request.getWardCode() != null) {
-      var province = locationService.getProvinceByCode(request.getProvinceCode());
-      var district =
-          locationService.getDistrictByCode(request.getProvinceCode(), request.getDistrictCode());
-      var ward = locationService.getWardByCode(request.getDistrictCode(), request.getWardCode());
-      deliveryAddress.setProvince(province);
-      deliveryAddress.setDistrict(district);
-      deliveryAddress.setWard(ward);
+        || request.getDistrictCode() != null
+        || request.getWardCode() != null) {
+      if (request.getProvinceCode() != null
+          && request.getDistrictCode() != null
+          && request.getWardCode() != null) {
+        var province = locationService.getProvinceByCode(request.getProvinceCode());
+        var district =
+            locationService.getDistrictByCode(request.getProvinceCode(), request.getDistrictCode());
+        var ward = locationService.getWardByCode(request.getDistrictCode(), request.getWardCode());
+        deliveryAddress.setProvince(province);
+        deliveryAddress.setDistrict(district);
+        deliveryAddress.setWard(ward);
+      } else {
+        throw new CustomRuntimeException(ErrorCode.NOT_UPDATE_ALL_LOCATION);
+      }
     }
+
     userDeliveryAddressRepository.save(deliveryAddress);
 
     return ApiResponse.<Void>builder().message("Delivery address updated").build();
@@ -117,7 +124,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
       String userId) {
     var user =
         userRepository
-            .findById(userId)
+            .findByIdAndNotDeleted(userId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     List<UserGetAddressDeliveryRequest> resp;
     resp =
@@ -147,7 +154,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
         userDeliveryAddressRepository
             .findDeliveryAddressActive(deliveryAddressId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND));
-    if (!userDeliveryAddressRepository.findByUserAndId(user, address.getId())) {
+    if (!userDeliveryAddressRepository.existsByUserIdAndDeliveryId(user.getId(), address.getId())) {
       throw new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND);
     }
     address.setDeletedAt(LocalDateTime.now());

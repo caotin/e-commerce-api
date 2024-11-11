@@ -56,6 +56,8 @@ public enum ErrorCode {
   INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
   // address delivery
   ADDRESS_NOT_FOUND("Address not found!", HttpStatus.NOT_FOUND),
+  NOT_UPDATE_ALL_LOCATION(
+      "You must update the entire address information!", HttpStatus.BAD_REQUEST),
   NOT_UPDATE_REQUEST("You have not updated anything!", HttpStatus.NOT_FOUND),
   ;
 

@@ -19,6 +19,9 @@ public interface UserRepository
   @Query("SELECT u FROM users u WHERE u.email = :email AND u.deletedAt IS NULL")
   Optional<UserEntity> findByEmailAndNotDeleted(@Param("email") String email);
 
+  @Query("SELECT u FROM users u WHERE u.id = :userId AND u.deletedAt IS NULL")
+  Optional<UserEntity> findByIdAndNotDeleted(@Param("userId") String userId);
+
   boolean existsByEmail(String email);
 
   @Query(
