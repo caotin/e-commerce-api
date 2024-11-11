@@ -76,7 +76,7 @@ public class UserService implements IUserServices {
   public ApiResponse<Void> updateUserDetail(UserUpdateRequest userUpdateRequest) {
     var oldUser =
         userRepository
-            .findByEmail(AuthUtils.getUserCurrent())
+            .findByEmailAndNotDeleted(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     if (userUpdateRequest.getName() != null && !userUpdateRequest.getName().trim().isEmpty()) {
       checkRepeatName(userUpdateRequest.getName(), oldUser.getName());
@@ -113,7 +113,7 @@ public class UserService implements IUserServices {
   public ApiResponse<UserGetResponse> getMe() {
     var user =
         userRepository
-            .findByEmail(AuthUtils.getUserCurrent())
+            .findByEmailAndNotDeleted(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.UNAUTHENTICATED));
 
     return ApiResponse.<UserGetResponse>builder()

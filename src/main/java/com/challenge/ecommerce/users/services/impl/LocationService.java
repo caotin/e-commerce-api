@@ -60,4 +60,32 @@ public class LocationService implements ILocationService {
     }
     return getListApiResponse(result, locationMap);
   }
+
+  @Override
+  public String getProvinceByCode(int provinceCode) {
+    var province = redisTemplate.opsForHash().get("provinces", String.valueOf(provinceCode));
+    if (province == null) {
+      throw new CustomRuntimeException(ErrorCode.PROVINCE_NOT_FOUND);
+    }
+    return province.toString();
+  }
+
+  @Override
+  public String getDistrictByCode(int provinceCode, int districtCode) {
+    var district =
+        redisTemplate.opsForHash().get("districts:" + provinceCode, String.valueOf(districtCode));
+    if (district == null) {
+      throw new CustomRuntimeException(ErrorCode.DISTRICT_NOT_FOUND);
+    }
+    return district.toString();
+  }
+
+  @Override
+  public String getWardByCode(int districtCode, int wardCode) {
+    var ward = redisTemplate.opsForHash().get("wards:" + districtCode, String.valueOf(wardCode));
+    if (ward == null) {
+      throw new CustomRuntimeException(ErrorCode.WARD_NOT_FOUND);
+    }
+    return ward.toString();
+  }
 }

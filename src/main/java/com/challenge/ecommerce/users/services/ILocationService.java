@@ -11,4 +11,10 @@ public interface ILocationService {
   ApiResponse<List<BaseLocation>> getDistrictsByProvinceId(int provinceCode);
 
   ApiResponse<List<BaseLocation>> getWardsByDistrictId(int districtCode);
+
+  String getProvinceByCode(int provinceCode);
+
+  String getDistrictByCode(int provinceCode, int districtCode);
+
+  String getWardByCode(int districtCode, int wardCode);
 }

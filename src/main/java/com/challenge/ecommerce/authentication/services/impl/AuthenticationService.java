@@ -63,7 +63,7 @@ public class AuthenticationService implements IAuthenticationService {
       AuthenticationRequest authenticationRequest) {
     var user =
         userRepository
-            .findByEmail(authenticationRequest.getEmail())
+            .findByEmailAndNotDeleted(authenticationRequest.getEmail())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     if (!passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword())) {
       throw new CustomRuntimeException(ErrorCode.PASSWORD_INCORRECT);
@@ -88,7 +88,7 @@ public class AuthenticationService implements IAuthenticationService {
   public ApiResponse<Void> logout() {
     var user =
         userRepository
-            .findByEmail(AuthUtils.getUserCurrent())
+            .findByEmailAndNotDeleted(AuthUtils.getUserCurrent())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
     user.setRefresh_token(null);
     userRepository.save(user);
@@ -114,7 +114,7 @@ public class AuthenticationService implements IAuthenticationService {
       var email = signedJWT.getJWTClaimsSet().getSubject();
       var user =
           userRepository
-              .findByEmail(email)
+              .findByEmailAndNotDeleted(email)
               .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
       if (!passwordEncoder.matches(request.getRefreshToken(), user.getRefresh_token())) {
         throw new CustomRuntimeException(ErrorCode.REFRESH_TOKEN_FAILED);
