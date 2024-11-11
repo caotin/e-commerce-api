@@ -3,6 +3,7 @@ package com.challenge.ecommerce.users.controllers.admin.deliveryAddress;
 import com.challenge.ecommerce.users.controllers.dtos.deliveryAddress.UserGetAddressDeliveryRequest;
 import com.challenge.ecommerce.users.services.IUserDeliveryAddressService;
 import com.challenge.ecommerce.utils.ApiResponse;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ public class DeliveryAddressControllers {
 
   @GetMapping("/all/{userId}")
   public ResponseEntity<ApiResponse<List<UserGetAddressDeliveryRequest>>> getAll(
-      @PathVariable String userId) {
+      @PathVariable @NotBlank(message = "userId id must be not null !") String userId) {
     var resp = userDeliveryAddressService.getAllDeliveryAddressesById(userId);
     return ResponseEntity.ok().body(resp);
   }
