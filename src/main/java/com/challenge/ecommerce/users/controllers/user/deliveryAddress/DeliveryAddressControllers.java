@@ -52,10 +52,10 @@ public class DeliveryAddressControllers {
     return ResponseEntity.ok().body(resp);
   }
 
-  @DeleteMapping("/{addressId}")
+  @DeleteMapping("users/{addressId}")
   public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
       @PathVariable @NotBlank(message = "addressId id must be not null !") String addressId) {
-    var resp = userDeliveryAddressService.deleteDeliveryAddress(addressId);
+    var resp = userDeliveryAddressService.deleteDeliveryAddressByUser(addressId);
     return ResponseEntity.ok().body(resp);
   }
 }

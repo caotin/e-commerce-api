@@ -36,9 +36,9 @@ public class SecurityConfig {
   };
   static final String[] PRIVATE_ADMIN_POST_ENDPOINT = {"/api/users/register"};
   static final String[] PRIVATE_ADMIN_PUT_ENDPOINT = {"/api/users/*"};
-  static final String[] PRIVATE_ADMIN_GET_ENDPOINT = {"/api/users/*", "/api/address/all/{id}"};
-  static final String[] PRIVATE_ADMIN_DELETE_ENDPOINT = {"/api/users"};
-  static final String[] PRIVATE_DELETE_ENDPOINT = {"/api/address/{id}"};
+  static final String[] PRIVATE_ADMIN_GET_ENDPOINT = {"/api/users/*", "/api/users/{id}/address"};
+  static final String[] PRIVATE_ADMIN_DELETE_ENDPOINT = {"/api/users", "/api/address/{id}"};
+  static final String[] PRIVATE_DELETE_ENDPOINT = {"/api/address/users/{id}"};
   static final String[] PRIVATE_POST_ENDPOINT = {"/api/address"};
   static final String[] SWAGGER_WHITELIST = {
     "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-resources"

@@ -15,6 +15,8 @@ public interface IUserDeliveryAddressService {
 
   ApiResponse<Void> deleteDeliveryAddress(String deliveryAddressId);
 
+  ApiResponse<Void> deleteDeliveryAddressByUser(String deliveryAddressId);
+
   ApiResponse<List<UserGetAddressDeliveryRequest>> getAllDeliveryAddresses();
 
   ApiResponse<List<UserGetAddressDeliveryRequest>> getAllDeliveryAddressesById(String userId);

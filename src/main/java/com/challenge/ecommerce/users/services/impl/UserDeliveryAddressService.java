@@ -91,7 +91,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
   public ApiResponse<Void> deleteDeliveryAddress(String deliveryAddressId) {
     var deliveryAddress =
         userDeliveryAddressRepository
-            .findById(deliveryAddressId)
+            .findDeliveryAddressActive(deliveryAddressId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND));
     deliveryAddress.setDeletedAt(LocalDateTime.now());
     userDeliveryAddressRepository.save(deliveryAddress);
@@ -135,5 +135,23 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND));
     var resp = userDeliveryAddressMapper.toUserGetAddressDeliveryRequest(delivery);
     return ApiResponse.<UserGetAddressDeliveryRequest>builder().result(resp).build();
+  }
+
+  @Override
+  public ApiResponse<Void> deleteDeliveryAddressByUser(String deliveryAddressId) {
+    var user =
+        userRepository
+            .findByEmailAndNotDeleted(AuthUtils.getUserCurrent())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.USER_NOT_FOUND));
+    var address =
+        userDeliveryAddressRepository
+            .findDeliveryAddressActive(deliveryAddressId)
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND));
+    if (!userDeliveryAddressRepository.findByUserAndId(user, address.getId())) {
+      throw new CustomRuntimeException(ErrorCode.ADDRESS_NOT_FOUND);
+    }
+    address.setDeletedAt(LocalDateTime.now());
+    userDeliveryAddressRepository.save(address);
+    return ApiResponse.<Void>builder().message("Delivery address deleted").build();
   }
 }

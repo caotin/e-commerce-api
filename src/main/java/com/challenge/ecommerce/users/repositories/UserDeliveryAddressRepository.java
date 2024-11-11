@@ -21,4 +21,6 @@ public interface UserDeliveryAddressRepository
 
   @Query("SELECT d FROM delivery_address d WHERE d.id = :id AND d.deletedAt IS NULL")
   Optional<DeliveryAddressEntity> findDeliveryAddressActive(@Param("id") String id);
+
+  boolean findByUserAndId(UserEntity user, String id);
 }

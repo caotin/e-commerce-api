@@ -21,10 +21,17 @@ import java.util.List;
 public class DeliveryAddressControllers {
   IUserDeliveryAddressService userDeliveryAddressService;
 
-  @GetMapping("/all/{userId}")
+  @GetMapping("/{userId}/address")
   public ResponseEntity<ApiResponse<List<UserGetAddressDeliveryRequest>>> getAll(
       @PathVariable @NotBlank(message = "userId id must be not null !") String userId) {
     var resp = userDeliveryAddressService.getAllDeliveryAddressesById(userId);
+    return ResponseEntity.ok().body(resp);
+  }
+
+  @DeleteMapping("/{addressId}")
+  public ResponseEntity<ApiResponse<Void>> deleteDeliveryAddress(
+      @PathVariable @NotBlank(message = "addressId id must be not null !") String addressId) {
+    var resp = userDeliveryAddressService.deleteDeliveryAddress(addressId);
     return ResponseEntity.ok().body(resp);
   }
 }
