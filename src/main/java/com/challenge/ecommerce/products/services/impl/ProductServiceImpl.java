@@ -19,10 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -30,19 +29,22 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class ProductServiceImpl implements IProductService {
 
-  CategoryRepository categoryRepository;
-  IProductMapper mapper;
-  ProductRepository productRepository;
-  ImageRepository imageRepository;
-  IImageMapper imageMapper;
   IImageService imageService;
   IVariantService variantService;
   IProductOptionService productOptionService;
   IProductOptionValueService productOptionValueService;
-  IVariantMapper variantMapper;
+
   ProductOptionRepository productOptionRepository;
-  IOptionMapper optionMapper;
   VariantValueRepository variantValueRepository;
+  VariantRepository variantRepository;
+  CategoryRepository categoryRepository;
+  ProductRepository productRepository;
+  ImageRepository imageRepository;
+
+  IProductMapper mapper;
+  IImageMapper imageMapper;
+  IVariantMapper variantMapper;
+  IOptionMapper optionMapper;
   IOptionValueMapper optionValueMapper;
 
   @Transactional
@@ -84,11 +86,7 @@ public class ProductServiceImpl implements IProductService {
     setListImage(resp, product);
 
     // set variant
-    var variantRsp = variantMapper.variantEntityToShortDto(variant);
-    // add variant value
-    List<VariantShortResponse> variantShortResponses = new ArrayList<>();
-    variantShortResponses.add(variantRsp);
-    resp.setVariants(variantShortResponses);
+    setListVariant(resp, product);
     // set review
     return resp;
   }
@@ -101,12 +99,14 @@ public class ProductServiceImpl implements IProductService {
             (root, query, criteriaBuilder) -> {
               var predicates = new ArrayList<>();
 
-              // Điều kiện để kiểm tra nếu deletedAt là null
+              // Check nullable deletedAt
               predicates.add(criteriaBuilder.isNull(root.get("deletedAt")));
 
               // Filter by category if provided
               if (category != null && !category.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("category"), category));
+                var categorySearch = StringHelper.toSlug(category);
+                var categoryJoin = root.join("category");
+                predicates.add(criteriaBuilder.equal(categoryJoin.get("slug"), categorySearch));
               }
 
               // Filter by minimum price if provided
@@ -130,19 +130,7 @@ public class ProductServiceImpl implements IProductService {
                 product -> {
                   var response = mapper.productEntityToDto(product);
                   setListImage(response, product);
-
-                  List<VariantShortResponse> variants =
-                      product.getVariants().stream()
-                          .map(
-                              variant -> {
-                                var variantResponse =
-                                    variantMapper.variantEntityToShortDto(variant);
-                                setListProductOption(variantResponse, product);
-                                return variantResponse;
-                              })
-                          .toList();
-                  response.setVariants(variants);
-
+                  setListVariant(response, product);
                   return response;
                 })
             .toList();
@@ -154,6 +142,85 @@ public class ProductServiceImpl implements IProductService {
         .limit(products.getNumberOfElements())
         .message("Get list product successfully")
         .build();
+  }
+
+  @Override
+  public ProductResponse getProductBySlug(String productSlug) {
+    var product =
+        productRepository
+            .findBySlugAndDeletedAtIsNull(productSlug)
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
+    var resp = mapper.productEntityToDto(product);
+    setListVariant(resp, product);
+    setListImage(resp, product);
+    return resp;
+  }
+
+  @Override
+  public ProductResponse updateProductBySlug(ProductUpdateDto request, String productSlug) {
+    var oldProduct =
+        productRepository
+            .findBySlugAndDeletedAtIsNull(productSlug)
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
+    var oldVariant =
+        variantRepository
+            .findByProductIDAndDeletedAtIsNull(oldProduct.getId())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.VARIANT_NOT_FOUND));
+    var newProduct = mapper.updateProductFromDto(request, oldProduct);
+    // update category
+    if (request.getCategoryId() != null) {
+      var category =
+          categoryRepository
+              .findByIdAndDeletedAt(request.getCategoryId())
+              .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
+      newProduct.setCategory(category);
+    }
+    var description =
+        request.getDescription() == null ? oldProduct.getDescription() : request.getDescription();
+    // update tile and description
+    var title = request.getTitle() == null ? oldProduct.getTitle() : request.getTitle();
+    var newTitle = StringHelper.changeFirstCharacterCase(title);
+    if (productRepository.existsByTitleAndDeletedAtIsNull(newTitle)
+        && !oldProduct.getTitle().equals(newTitle)) {
+      throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
+    }
+    newProduct.setTitle(newTitle);
+    newProduct.setSlug(StringHelper.toSlug(newTitle));
+    if (description.isBlank()) {
+      throw new CustomRuntimeException(ErrorCode.DESCRIPTION_CANNOT_BE_NULL);
+    }
+    newProduct.setDescription(description);
+
+    // update image
+    if (request.getImages() != null) {
+      imageService.updateImage(request.getImages(), newProduct);
+    }
+    // update variants
+    var newVariant = variantService.updateProductVariant(request, oldVariant, newProduct);
+
+    if (request.getOptions() != null) {
+      // set option
+      productOptionService.updateProductOptionAndOptionValues(request, newProduct, newVariant);
+    }
+    productRepository.save(newProduct);
+    var resp = mapper.productEntityToDto(newProduct);
+    setTotal(resp, newProduct);
+    setListImage(resp, newProduct);
+
+    // set variant
+    setListVariant(resp, newProduct);
+    // set review
+    return resp;
+  }
+
+  @Override
+  public void deleteProductBySlug(String productSlug) {
+    var product =
+        productRepository
+            .findBySlugAndDeletedAtIsNull(productSlug)
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
+    product.setDeletedAt(LocalDateTime.now());
+    productRepository.save(product);
   }
 
   void setListImage(ProductResponse resp, ProductEntity product) {
@@ -178,7 +245,7 @@ public class ProductServiceImpl implements IProductService {
   }
 
   void setListProductOption(VariantShortResponse resp, ProductEntity product) {
-    var options = productOptionRepository.findByProductIDAndDeleteAtIsNull(product.getId());
+    var options = productOptionRepository.findByProductIdAndDeletedAtIsNull(product.getId());
     List<OptionResponse> optionResponses =
         options.stream()
             .map(
@@ -200,5 +267,20 @@ public class ProductServiceImpl implements IProductService {
     List<OptionValueResponse> optionValueResponses =
         optionValues.stream().map(optionValueMapper::optionValueEntityToDto).toList();
     resp.setOptionValues(optionValueResponses);
+  }
+
+  void setListVariant(ProductResponse resp, ProductEntity product) {
+    if (product.getVariants() != null) {
+      List<VariantShortResponse> variants =
+          product.getVariants().stream()
+              .map(
+                  variant -> {
+                    var variantResponse = variantMapper.variantEntityToShortDto(variant);
+                    setListProductOption(variantResponse, product);
+                    return variantResponse;
+                  })
+              .toList();
+      resp.setVariants(variants);
+    }
   }
 }

@@ -3,8 +3,10 @@ package com.challenge.ecommerce.products.controllers;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
+import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.services.IProductService;
 import com.challenge.ecommerce.utils.ApiResponse;
+import com.challenge.ecommerce.utils.StringHelper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
@@ -57,5 +59,30 @@ public class ProductController {
     Pageable pageable = PageRequest.of(page, size, sort);
     var listProducts = productService.getListProducts(pageable, category, minPrice, maxPrice);
     return ResponseEntity.ok(listProducts);
+  }
+
+  @GetMapping("/{productSlug}")
+  public ResponseEntity<?> getProductBySlug(@PathVariable String productSlug) {
+    String formattedSlug = StringHelper.toSlug(productSlug);
+    var product = productService.getProductBySlug(formattedSlug);
+    var resp = ApiResponse.builder().result(product).message("Get Product Successfully").build();
+    return ResponseEntity.ok(resp);
+  }
+
+  @PutMapping("/{productSlug}")
+  public ResponseEntity<?> updateProductBySlug(
+      @PathVariable String productSlug, @RequestBody @Valid ProductUpdateDto request) {
+    String formattedSlug = StringHelper.toSlug(productSlug);
+    var product = productService.updateProductBySlug(request, formattedSlug);
+    var resp = ApiResponse.builder().result(product).message("Update Product Successfully").build();
+    return ResponseEntity.ok(resp);
+  }
+
+  @DeleteMapping("/{productSlug}")
+  public ResponseEntity<?> deleteProductBySlug(@PathVariable String productSlug) {
+    String formattedSlug = StringHelper.toSlug(productSlug);
+    productService.deleteProductBySlug(formattedSlug);
+    var resp = ApiResponse.builder().message("Delete Product Successfully").build();
+    return ResponseEntity.ok(resp);
   }
 }

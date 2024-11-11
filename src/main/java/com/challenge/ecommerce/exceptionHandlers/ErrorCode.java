@@ -53,6 +53,13 @@ public enum ErrorCode {
   VARIANT_NOT_FOUND("Variant not found", HttpStatus.NOT_FOUND),
   PRODUCT_NAME_EXISTED("Product name already existed", HttpStatus.BAD_REQUEST),
   INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
+  PRODUCT_NOT_FOUND("Product not found", HttpStatus.NOT_FOUND),
+  DESCRIPTION_CANNOT_BE_NULL("Description cannot be null", HttpStatus.BAD_REQUEST),
+  INVALID_OPTION_VALUE_FOR_OPTION("Invalid option value for option", HttpStatus.BAD_REQUEST),
+  AVATAR_PRODUCT_IMAGE_ONLY_ONE("Avatar product image only one", HttpStatus.BAD_REQUEST),
+  AVATAR_PRODUCT_CANNOT_BE_NULL("Avatar product image cannot be null", HttpStatus.BAD_REQUEST),
+  THUMBNAIL_PRODUCT_CANNOT_BE_NULL(
+      "Thumbnail product image cannot be null", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
