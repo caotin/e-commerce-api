@@ -59,6 +59,13 @@ public enum ErrorCode {
   NOT_UPDATE_ALL_LOCATION(
       "You must update the entire address information!", HttpStatus.BAD_REQUEST),
   NOT_UPDATE_REQUEST("You have not updated anything!", HttpStatus.NOT_FOUND),
+  PRODUCT_NOT_FOUND("Product not found", HttpStatus.NOT_FOUND),
+  DESCRIPTION_CANNOT_BE_NULL("Description cannot be null", HttpStatus.BAD_REQUEST),
+  INVALID_OPTION_VALUE_FOR_OPTION("Invalid option value for option", HttpStatus.BAD_REQUEST),
+  AVATAR_PRODUCT_IMAGE_ONLY_ONE("Avatar product image only one", HttpStatus.BAD_REQUEST),
+  AVATAR_PRODUCT_CANNOT_BE_NULL("Avatar product image cannot be null", HttpStatus.BAD_REQUEST),
+  THUMBNAIL_PRODUCT_CANNOT_BE_NULL(
+      "Thumbnail product image cannot be null", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;

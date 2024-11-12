@@ -1,13 +1,13 @@
 package com.challenge.ecommerce.products.controllers.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,8 +16,7 @@ import java.math.BigDecimal;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateDto {
-  @NotBlank(message = "Product title cannot be blank")
-  @Size(min = 2, max = 60, message = "Product title must be between 2 and 60 characters")
+
   String title;
 
   String description;
@@ -26,8 +25,15 @@ public class ProductUpdateDto {
 
   BigDecimal price;
 
-  Integer stockQuantity;
+  Integer stock_quantity;
 
-  String optionId;
-  String valueId;
+  String sku_id;
+
+  @NotEmpty(message = "Option list cannot be empty")
+  @Valid
+  List<ProductOptionCreateDto> options = new ArrayList<>();
+
+  @NotEmpty(message = "Images list cannot be empty")
+  @Valid
+  List<ProductImageCreateDto> images = new ArrayList<>();
 }
