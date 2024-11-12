@@ -47,12 +47,18 @@ public enum ErrorCode {
   OPTION_NOT_FOUND("Option not found", HttpStatus.NOT_FOUND),
   PROVINCE_NOT_FOUND("The province you selected does not exist", HttpStatus.BAD_REQUEST),
   DISTRICT_NOT_FOUND("The district you selected does not exist", HttpStatus.BAD_REQUEST),
+  WARD_NOT_FOUND("The ward you selected does not exist", HttpStatus.BAD_REQUEST),
   MIN_PRICE_GREATER_MAX_PRICE("maxPrice must be greater than minPrice", HttpStatus.BAD_REQUEST),
   SKU_ID_EXISTED("Sku id already existed", HttpStatus.BAD_REQUEST),
   OPTION_VALUE_NOT_FOUND("Option value not found", HttpStatus.BAD_REQUEST),
   VARIANT_NOT_FOUND("Variant not found", HttpStatus.NOT_FOUND),
   PRODUCT_NAME_EXISTED("Product name already existed", HttpStatus.BAD_REQUEST),
   INVALID_IMAGE_URL("Invalid image URL", HttpStatus.BAD_REQUEST),
+  // address delivery
+  ADDRESS_NOT_FOUND("Address not found!", HttpStatus.NOT_FOUND),
+  NOT_UPDATE_ALL_LOCATION(
+      "You must update the entire address information!", HttpStatus.BAD_REQUEST),
+  NOT_UPDATE_REQUEST("You have not updated anything!", HttpStatus.NOT_FOUND),
   PRODUCT_NOT_FOUND("Product not found", HttpStatus.NOT_FOUND),
   DESCRIPTION_CANNOT_BE_NULL("Description cannot be null", HttpStatus.BAD_REQUEST),
   INVALID_OPTION_VALUE_FOR_OPTION("Invalid option value for option", HttpStatus.BAD_REQUEST),
