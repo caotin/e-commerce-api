@@ -16,15 +16,18 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateDto {
-
   String title;
 
   String description;
 
   String categoryId;
 
+  @NotNull(message = "Price must not be null")
+  @Positive(message = "Price must be greater than zero")
   BigDecimal price;
 
+  @NotNull(message = "Stock quantity must not be null")
+  @Min(value = 0, message = "Stock quantity must be non-negative")
   Integer stock_quantity;
 
   String sku_id;

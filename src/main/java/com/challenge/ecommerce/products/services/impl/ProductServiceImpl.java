@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -56,39 +57,18 @@ public class ProductServiceImpl implements IProductService {
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
     var product = mapper.productCreateDtoToEntity(request);
     product.setCategory(category);
-    // set slug
-    var slug = StringHelper.toSlug(request.getTitle());
-    product.setSlug(slug);
 
     var title = StringHelper.changeFirstCharacterCase(request.getTitle());
     if (productRepository.existsByTitleAndDeletedAtIsNull(title)) {
       throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
     }
+    // set slug
+    var slug = StringHelper.toSlug(request.getTitle());
+    product.setSlug(slug);
     product.setTitle(title);
     productRepository.save(product);
 
-    // Save list images
-    imageService.saveImage(request.getImages(), product);
-
-    // set variants
-    var variant = variantService.addProductVariant(request, product);
-
-    // set option
-    productOptionService.addProductOption(request, product);
-
-    // set option value
-    productOptionValueService.addProductOptionValue(request, product, variant);
-
-    var resp = mapper.productEntityToDto(product);
-
-    // set total fields
-    setTotal(resp, product);
-    setListImage(resp, product);
-
-    // set variant
-    setListVariant(resp, product);
-    // set review
-    return resp;
+    return mapper.productEntityToDto(product);
   }
 
   @Override
@@ -162,10 +142,6 @@ public class ProductServiceImpl implements IProductService {
         productRepository
             .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
-    var oldVariant =
-        variantRepository
-            .findByProductIDAndDeletedAtIsNull(oldProduct.getId())
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.VARIANT_NOT_FOUND));
     var newProduct = mapper.updateProductFromDto(request, oldProduct);
     // update category
     if (request.getCategoryId() != null) {
@@ -175,9 +151,10 @@ public class ProductServiceImpl implements IProductService {
               .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
       newProduct.setCategory(category);
     }
+
+    // update tile and description
     var description =
         request.getDescription() == null ? oldProduct.getDescription() : request.getDescription();
-    // update tile and description
     var title = request.getTitle() == null ? oldProduct.getTitle() : request.getTitle();
     var newTitle = StringHelper.changeFirstCharacterCase(title);
     if (productRepository.existsByTitleAndDeletedAtIsNull(newTitle)
@@ -196,12 +173,13 @@ public class ProductServiceImpl implements IProductService {
       imageService.updateImage(request.getImages(), newProduct);
     }
     // update variants
-    var newVariant = variantService.updateProductVariant(request, oldVariant, newProduct);
+    var variant = variantService.addProductVariant(request, newProduct);
 
-    if (request.getOptions() != null) {
-      // set option
-      productOptionService.updateProductOptionAndOptionValues(request, newProduct, newVariant);
-    }
+    // set option
+    productOptionService.addProductOption(request, newProduct);
+    // set option value
+    productOptionValueService.addProductOptionValue(request, newProduct, variant);
+
     productRepository.save(newProduct);
     var resp = mapper.productEntityToDto(newProduct);
     setTotal(resp, newProduct);
@@ -251,22 +229,27 @@ public class ProductServiceImpl implements IProductService {
             .map(
                 option -> {
                   var optionResp = optionMapper.optionEntityToDto(option);
-                  setListOptionValue(optionResp, product, resp);
-                  return optionResp;
+                  boolean check = setListOptionValue(optionResp, product, resp);
+                  return check ? optionResp : null;
                 })
+            .filter(Objects::nonNull)
             .toList();
 
     resp.setOptions(optionResponses);
   }
 
-  void setListOptionValue(
+  boolean setListOptionValue(
       OptionResponse resp, ProductEntity product, VariantShortResponse variant) {
     var optionValues =
         variantValueRepository.findByVariantIdAndOptionIdAndDeletedAtIsNull(
             variant.getId(), resp.getId());
-    List<OptionValueResponse> optionValueResponses =
-        optionValues.stream().map(optionValueMapper::optionValueEntityToDto).toList();
-    resp.setOptionValues(optionValueResponses);
+    if (!optionValues.isEmpty()) {
+      List<OptionValueResponse> optionValueResponses =
+          optionValues.stream().map(optionValueMapper::optionValueEntityToDto).toList();
+      resp.setOptionValues(optionValueResponses);
+      return true;
+    }
+    return false;
   }
 
   void setListVariant(ProductResponse resp, ProductEntity product) {

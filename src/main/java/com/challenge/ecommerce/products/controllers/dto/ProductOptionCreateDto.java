@@ -18,7 +18,6 @@ public class ProductOptionCreateDto {
   @NotBlank(message = "Option ID must not be null")
   String idOption;
 
-  @NotEmpty(message = "Value list cannot be empty")
-  @Valid
-  List<ProductOptionValueCreateDto> optionValues;
+  @NotBlank(message = "Option Value ID must not be null")
+  String idOptionValue;
 }
