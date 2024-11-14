@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 @Service
@@ -28,9 +29,7 @@ public class VariantServiceImpl implements IVariantService {
 
   @Override
   public VariantEntity addProductVariant(ProductUpdateDto request, ProductEntity product) {
-    if (variantRepository.existsBySkuIdAndDeletedAtIsNull(request.getSku_id())
-        && !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(
-            request.getSku_id(), product.getId())) {
+    if (isSkuIdTakenByAnotherProduct(request.getSku_id(), product.getId())) {
       throw new CustomRuntimeException(ErrorCode.SKU_ID_EXISTED);
     }
 
@@ -55,5 +54,20 @@ public class VariantServiceImpl implements IVariantService {
             .findBySkuIdAndDeletedAtIsNull(request.getSku_id())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.VARIANT_NOT_FOUND));
     return mapper.updateVariantFromDto(request, oldVariant);
+  }
+
+  @Override
+  public void deleteByProduct(ProductEntity product) {
+    var variant = variantRepository.findByProductIdAndDeletedAtIsNull(product.getId());
+    if (variant.isPresent()) {
+
+      variant.get().setDeletedAt(LocalDateTime.now());
+      variantRepository.save(variant.get());
+    }
+  }
+
+  private boolean isSkuIdTakenByAnotherProduct(String skuId, String productId) {
+    return variantRepository.existsBySkuIdAndDeletedAtIsNull(skuId)
+        && !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(skuId, productId);
   }
 }

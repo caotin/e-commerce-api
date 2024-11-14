@@ -6,4 +6,5 @@ import com.challenge.ecommerce.products.models.VariantEntity;
 
 public interface IVariantService {
   VariantEntity addProductVariant(ProductUpdateDto request, ProductEntity product);
+  void deleteByProduct(ProductEntity product);
 }

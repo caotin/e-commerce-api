@@ -11,10 +11,10 @@ import java.util.List;
 
 @Repository
 public interface ProductOptionRepository extends JpaRepository<ProductOptionEntity, String> {
-  @Query("SELECT b FROM product_options b WHERE b.product.id =:productId AND b.deletedAt IS NULL")
+  @Query("SELECT b FROM product_options b INNER JOIN options c ON b.option.id = c.id WHERE b.product.id =:productId AND b.deletedAt IS NULL AND c.deletedAt IS NULL")
   List<ProductOptionEntity> findByProductIDAndDeletedAtIsNull(@Param("productId") String productId);
 
   @Query(
-      "SELECT b.option FROM product_options b WHERE b.product.id = :productId AND b.deletedAt IS NULL")
+      "SELECT b.option FROM product_options b inner join options c on b.option.id=c.id WHERE b.product.id = :productId AND b.deletedAt IS NULL AND c.deletedAt IS NULL")
   List<OptionEntity> findByProductIdAndDeletedAtIsNull(@Param("productId") String productId);
 }

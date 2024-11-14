@@ -194,6 +194,7 @@ public class ProductServiceImpl implements IProductService {
             .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
     product.setDeletedAt(LocalDateTime.now());
+    variantService.deleteByProduct(product);
     productRepository.save(product);
   }
 
