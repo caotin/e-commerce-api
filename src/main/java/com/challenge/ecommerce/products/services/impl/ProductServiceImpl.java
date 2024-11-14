@@ -33,11 +33,9 @@ public class ProductServiceImpl implements IProductService {
   IImageService imageService;
   IVariantService variantService;
   IProductOptionService productOptionService;
-  IProductOptionValueService productOptionValueService;
 
   ProductOptionRepository productOptionRepository;
   VariantValueRepository variantValueRepository;
-  VariantRepository variantRepository;
   CategoryRepository categoryRepository;
   ProductRepository productRepository;
   ImageRepository imageRepository;
@@ -175,10 +173,8 @@ public class ProductServiceImpl implements IProductService {
     // update variants
     var variant = variantService.addProductVariant(request, newProduct);
 
-    // set option
-    productOptionService.addProductOption(request, newProduct);
-    // set option value
-    productOptionValueService.addProductOptionValue(request, newProduct, variant);
+    // set option and option value
+    productOptionService.updateProductOptionAndOptionValues(request, newProduct, variant);
 
     productRepository.save(newProduct);
     var resp = mapper.productEntityToDto(newProduct);

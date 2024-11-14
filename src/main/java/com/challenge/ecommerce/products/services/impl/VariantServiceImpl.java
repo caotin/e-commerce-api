@@ -28,20 +28,32 @@ public class VariantServiceImpl implements IVariantService {
 
   @Override
   public VariantEntity addProductVariant(ProductUpdateDto request, ProductEntity product) {
-    if (variantRepository.existsBySkuIdAndDeletedAtIsNull(request.getSku_id())) {
+    if (variantRepository.existsBySkuIdAndDeletedAtIsNull(request.getSku_id())
+        && !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(
+            request.getSku_id(), product.getId())) {
       throw new CustomRuntimeException(ErrorCode.SKU_ID_EXISTED);
     }
 
-    var variant = mapper.productUpdateDtoToVariantEntity(request);
-    variant.setProduct(product);
+    // check variant or sku not exist
+    if (product.getVariants().isEmpty()
+        || !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(
+            request.getSku_id(), product.getId())) {
+      var variant = mapper.productUpdateDtoToVariantEntity(request);
+      variant.setProduct(product);
+      if (product.getVariants() == null) {
+        product.setVariants(new HashSet<>());
+      }
+      product.getVariants().add(variant);
+      variantRepository.save(variant);
+      productRepository.save(product);
 
-    if (product.getVariants() == null) {
-      product.setVariants(new HashSet<>());
+      return variant;
     }
-    product.getVariants().add(variant);
-    variantRepository.save(variant);
-    productRepository.save(product);
 
-    return variant;
+    var oldVariant =
+        variantRepository
+            .findBySkuIdAndDeletedAtIsNull(request.getSku_id())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.VARIANT_NOT_FOUND));
+    return mapper.updateVariantFromDto(request, oldVariant);
   }
 }
