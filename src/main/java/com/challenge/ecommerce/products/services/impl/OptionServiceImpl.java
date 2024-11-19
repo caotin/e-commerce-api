@@ -75,6 +75,9 @@ public class OptionServiceImpl implements IOptionService {
     var optionName =
         request.getOption_name() == null ? oldOption.getOption_name() : request.getOption_name();
     if (optionName == null) throw new CustomRuntimeException(ErrorCode.OPTION_NAME_CANNOT_BE_NULL);
+    if (optionRepository.existsByOptionNameAndDeletedAtIsNull(request.getOption_name())) {
+      throw new CustomRuntimeException(ErrorCode.OPTION_NAME_EXISTED);
+    }
     var newOption = mapper.updateOptionFromDto(request, oldOption);
     optionName = StringHelper.changeFirstCharacterCase(optionName);
     newOption.setOption_name(optionName);

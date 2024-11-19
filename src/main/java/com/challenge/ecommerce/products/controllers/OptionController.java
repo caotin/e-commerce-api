@@ -96,7 +96,7 @@ public class OptionController {
   @GetMapping("/values/{optionValueId}")
   public ResponseEntity<?> getOptionValue(@PathVariable("optionValueId") String optionValueId) {
     var optionValue = optionValueService.getOptionValue(optionValueId);
-    var resp = ApiResponse.builder().result(optionValue).message("Get option successfully").build();
+    var resp = ApiResponse.builder().result(optionValue).message("Get option value successfully").build();
     return ResponseEntity.ok(resp);
   }
 

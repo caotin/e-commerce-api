@@ -40,16 +40,11 @@ public class OptionValueServiceImpl implements IOptionValueService {
         optionRepository
             .findByIdAndDeletedAtIsNull(optionId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
-
-    var existingNames =
-        optionValueRepository.findAllValueNamesByOptionAndDeletedAtIsNull(option.getId());
     List<OptionValueEntity> valueEntities =
         request.getOptionValues().stream()
             .map(
                 child -> {
-                  if (existingNames.contains(child.getValueName())) {
-                    throw new CustomRuntimeException(ErrorCode.OPTION_VALUE_NAME_EXISTED);
-                  }
+                  checkExistsOptionValueName(option, child.getValueName());
                   OptionValueEntity valueEntity = new OptionValueEntity();
                   valueEntity.setValue_name(
                       StringHelper.changeFirstCharacterCase(child.getValueName()));
@@ -69,13 +64,6 @@ public class OptionValueServiceImpl implements IOptionValueService {
         optionValueRepository
             .findByIdAndDeletedAtIsNull(optionValueId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
-    var optionValueName =
-        request.getValueName() == null ? oldOptionValue.getValue_name() : request.getValueName();
-    if (optionValueName.isEmpty())
-      throw new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND);
-    var newOptionValue = optionValueMapper.updateOptionValueFromDto(request, oldOptionValue);
-    newOptionValue.setValue_name(StringHelper.changeFirstCharacterCase(optionValueName));
-    optionValueRepository.save(newOptionValue);
     var optionId =
         optionRepository
             .findByOptionValueIdAndDeletedAtIsNull(optionValueId)
@@ -84,6 +72,15 @@ public class OptionValueServiceImpl implements IOptionValueService {
         optionRepository
             .findByIdAndDeletedAtIsNull(optionId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
+    var optionValueName =
+        request.getValueName() == null ? oldOptionValue.getValue_name() : request.getValueName();
+    if (optionValueName == null || optionValueName.isEmpty())
+      throw new CustomRuntimeException(ErrorCode.INVALID_OPTION_VALUE_NAME);
+    checkExistsOptionValueName(option, optionValueName);
+    var newOptionValue = optionValueMapper.updateOptionValueFromDto(request, oldOptionValue);
+    newOptionValue.setValue_name(StringHelper.changeFirstCharacterCase(optionValueName));
+    optionValueRepository.save(newOptionValue);
+
     var resp = mapper.optionEntityToDto(option);
     setListOptionValue(option, resp);
     return resp;
@@ -135,5 +132,13 @@ public class OptionValueServiceImpl implements IOptionValueService {
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
     optionValue.setDeletedAt(LocalDateTime.now());
     optionValueRepository.save(optionValue);
+  }
+
+  void checkExistsOptionValueName(OptionEntity option, String optionValueName) {
+    var existingNames =
+        optionValueRepository.findAllValueNamesByOptionAndDeletedAtIsNull(option.getId());
+    if (existingNames.contains(optionValueName)) {
+      throw new CustomRuntimeException(ErrorCode.OPTION_VALUE_NAME_EXISTED);
+    }
   }
 }
