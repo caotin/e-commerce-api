@@ -76,6 +76,7 @@ public enum ErrorCode {
   AVATAR_PRODUCT_CANNOT_BE_NULL("Avatar product image cannot be null", HttpStatus.BAD_REQUEST),
   THUMBNAIL_PRODUCT_CANNOT_BE_NULL(
       "Thumbnail product image cannot be null", HttpStatus.BAD_REQUEST),
+  OPTION_NAME_CANNOT_BE_NULL("Option name cannot be null", HttpStatus.BAD_REQUEST),
   ;
 
   private final String message;
