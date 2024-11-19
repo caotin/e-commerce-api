@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +56,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
   }
 
   @Override
+  @Transactional
   public ApiResponse<Void> updateDeliveryAddress(
       UserUpdateAddressDeliveryRequest request, String deliveryAddressId) {
     if (request.getGuide_position() == null
@@ -95,6 +97,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
   }
 
   @Override
+  @Transactional
   public ApiResponse<Void> deleteDeliveryAddress(String deliveryAddressId) {
     var deliveryAddress =
         userDeliveryAddressRepository
@@ -145,6 +148,7 @@ public class UserDeliveryAddressService implements IUserDeliveryAddressService {
   }
 
   @Override
+  @Transactional
   public ApiResponse<Void> deleteDeliveryAddressByUser(String deliveryAddressId) {
     var user =
         userRepository

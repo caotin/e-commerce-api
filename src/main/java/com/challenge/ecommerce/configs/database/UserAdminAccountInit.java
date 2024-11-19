@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
-@Configuration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
@@ -36,7 +35,7 @@ public class UserAdminAccountInit {
   ApplicationRunner applicationRunner(UserRepository userRepository) {
     log.info("Initializing application.....");
     return args -> {
-      if (!userRepository.existsByEmail(ADMIN_EMAIL)) {
+      if (!userRepository.findActiveUserEmails(ADMIN_EMAIL)) {
         UserEntity user =
             UserEntity.builder()
                 .name(ADMIN_USER_NAME)
@@ -48,7 +47,6 @@ public class UserAdminAccountInit {
                 .build();
 
         user.setCreatedAt(LocalDateTime.now());
-        user.setDeletedAt(LocalDateTime.now());
 
         userRepository.save(user);
         log.warn("admin user has been created with default password: admin, please change it");

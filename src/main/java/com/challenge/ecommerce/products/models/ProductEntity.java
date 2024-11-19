@@ -53,9 +53,5 @@ public class ProductEntity extends BaseEntity {
 
   @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
   @JsonManagedReference
-  Set<ReviewEntity> reviews = new HashSet<>();
-
-  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-  @JsonManagedReference
   Set<VariantEntity> variants = new HashSet<>();
 }

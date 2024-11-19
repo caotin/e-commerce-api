@@ -8,12 +8,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EnableRedisRepositories
 public class RedisConfig {
 
   @Value("${spring.data.redis.host}")
@@ -22,10 +24,14 @@ public class RedisConfig {
   @Value("${spring.data.redis.port}")
   int redisPort;
 
+  @Value("${spring.data.redis.password}")
+  String redisPassword;
+
   @Bean
   public LettuceConnectionFactory lettuceConnectionFactory() {
     RedisStandaloneConfiguration redisStandaloneConfiguration =
         new RedisStandaloneConfiguration(redisHost, redisPort);
+    redisStandaloneConfiguration.setPassword(redisPassword);
     return new LettuceConnectionFactory(redisStandaloneConfiguration);
   }
 

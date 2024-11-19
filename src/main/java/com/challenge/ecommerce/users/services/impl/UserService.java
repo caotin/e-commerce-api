@@ -200,7 +200,7 @@ public class UserService implements IUserServices {
 
   // check email unique .
   private void checkEmailUnique(String email) {
-    if (userRepository.existsByEmail(email)) {
+    if (userRepository.findActiveUserEmails(email)) {
       throw new CustomRuntimeException(ErrorCode.EMAIL_EXISTED);
     }
   }

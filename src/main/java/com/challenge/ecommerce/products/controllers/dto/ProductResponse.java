@@ -1,7 +1,6 @@
 package com.challenge.ecommerce.products.controllers.dto;
 
 import com.challenge.ecommerce.categories.controllers.dto.CategoryResponse;
-import com.challenge.ecommerce.reviews.controllers.dto.ReviewResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -37,7 +36,7 @@ public class ProductResponse {
 
   List<ProductImageResponse> images = new ArrayList<>();
 
-  // List<ReviewResponse> reviews = new ArrayList<>();
+  // List<ReviewGetResponse> reviews = new ArrayList<>();
 
   List<VariantShortResponse> variants = new ArrayList<>();
 }
