@@ -14,15 +14,12 @@ import java.util.Optional;
 @Repository
 public interface UserRepository
     extends JpaRepository<UserEntity, String>, JpaSpecificationExecutor<UserEntity> {
-  Optional<UserEntity> findByEmail(String email);
 
   @Query("SELECT u FROM users u WHERE u.email = :email AND u.deletedAt IS NULL")
   Optional<UserEntity> findByEmailAndNotDeleted(@Param("email") String email);
 
   @Query("SELECT u FROM users u WHERE u.id = :userId AND u.deletedAt IS NULL")
   Optional<UserEntity> findByIdAndNotDeleted(@Param("userId") String userId);
-
-  boolean existsByEmail(String email);
 
   @Query(
       "select case when count(u) > 0 then true else false end from users u where u.deletedAt is  null and u.email = :email")

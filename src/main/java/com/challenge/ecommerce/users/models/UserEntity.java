@@ -24,7 +24,7 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class UserEntity extends BaseEntity {
-    @Column(nullable = false,unique = true,columnDefinition = "VARCHAR(100)")
+    @Column(nullable = false,columnDefinition = "VARCHAR(100)")
     String name;
 
     @Column(nullable = false)

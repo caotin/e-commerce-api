@@ -1,10 +1,9 @@
 package com.challenge.ecommerce.reviews.models;
 
-import com.challenge.ecommerce.products.models.ProductEntity;
+import com.challenge.ecommerce.orders.models.OrderItemEntity;
 import com.challenge.ecommerce.users.models.UserEntity;
 import com.challenge.ecommerce.utils.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.mysql.cj.protocol.ColumnDefinition;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,20 +21,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class ReviewEntity extends BaseEntity {
-    @Column(columnDefinition = "TEXT")
-    String content;
+  @Column(columnDefinition = "TEXT")
+  String content;
 
-    @Min(1)
-    @Max(5)
-    Integer rating;
+  @Min(1)
+  @Max(5)
+  Integer rating;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @JsonBackReference
-    UserEntity user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
+  @JsonBackReference
+  UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    @JsonBackReference
-    ProductEntity product;
+  @OneToOne @JoinColumn OrderItemEntity orderItem;
 }

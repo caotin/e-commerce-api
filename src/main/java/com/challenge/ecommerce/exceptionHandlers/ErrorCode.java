@@ -59,6 +59,16 @@ public enum ErrorCode {
   NOT_UPDATE_ALL_LOCATION(
       "You must update the entire address information!", HttpStatus.BAD_REQUEST),
   NOT_UPDATE_REQUEST("You have not updated anything!", HttpStatus.NOT_FOUND),
+  // order_item
+  ORDER_ITEM_NOT_FOUND("Order item not found", HttpStatus.NOT_FOUND),
+  ORDER_ITEM_ALREADY_REVIEWED("You have already reviewed this order item", HttpStatus.BAD_REQUEST),
+  // order
+  ORDER_NOT_FOUND("Order not found", HttpStatus.NOT_FOUND),
+  NO_PERMISSION_TO_REVIEW("You do not have permission to review", HttpStatus.FORBIDDEN),
+  // review
+  REVIEW_NOT_FOUND("Review not found", HttpStatus.NOT_FOUND),
+  EMPTY_UPDATE_REVIEW_CONTENT("Review content cannot be empty!", HttpStatus.BAD_REQUEST),
+  NOT_YOUR_REVIEW("This review does not belong to you!", HttpStatus.FORBIDDEN),
   PRODUCT_NOT_FOUND("Product not found", HttpStatus.NOT_FOUND),
   DESCRIPTION_CANNOT_BE_NULL("Description cannot be null", HttpStatus.BAD_REQUEST),
   INVALID_OPTION_VALUE_FOR_OPTION("Invalid option value for option", HttpStatus.BAD_REQUEST),
