@@ -26,23 +26,4 @@ public class ProductCreateDto {
 
   @NotBlank(message = "Category Id must not be null")
   String categoryId;
-
-  @NotNull(message = "Price must not be null")
-  @Positive(message = "Price must be greater than zero")
-  BigDecimal price;
-
-  @NotNull(message = "Stock quantity must not be null")
-  @Min(value = 0, message = "Stock quantity must be non-negative")
-  Integer stock_quantity;
-
-  @NotBlank(message = "Sku Id must not be null")
-  String sku_id;
-
-  @NotEmpty(message = "Option list cannot be empty")
-  @Valid
-  List<ProductOptionCreateDto> options = new ArrayList<>();
-
-  @NotEmpty(message = "Images list cannot be empty")
-  @Valid
-  List<ProductImageCreateDto> images = new ArrayList<>();
 }

@@ -1,6 +1,5 @@
 package com.challenge.ecommerce.products.mappers;
 
-import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
 import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.controllers.dto.VariantShortResponse;
 import com.challenge.ecommerce.products.models.VariantEntity;
@@ -14,7 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface IVariantMapper {
 
-  VariantEntity productCreateDtoToVariantEntity(ProductCreateDto request);
+  VariantEntity productUpdateDtoToVariantEntity(ProductUpdateDto request);
 
   @Mapping(target = "createdAt", source = "createdAt")
   VariantShortResponse variantEntityToShortDto(VariantEntity entity);

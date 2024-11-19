@@ -2,7 +2,6 @@ package com.challenge.ecommerce.products.services.impl;
 
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
-import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
 import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.mappers.IVariantMapper;
 import com.challenge.ecommerce.products.models.ProductEntity;
@@ -16,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 @Service
@@ -28,36 +28,46 @@ public class VariantServiceImpl implements IVariantService {
   private final ProductRepository productRepository;
 
   @Override
-  public VariantEntity addProductVariant(ProductCreateDto request, ProductEntity product) {
-    if (variantRepository.existsBySkuIdAndDeletedAtIsNull(request.getSku_id())) {
+  public VariantEntity addProductVariant(ProductUpdateDto request, ProductEntity product) {
+    if (isSkuIdTakenByAnotherProduct(request.getSku_id(), product.getId())) {
       throw new CustomRuntimeException(ErrorCode.SKU_ID_EXISTED);
     }
 
-    var variant = mapper.productCreateDtoToVariantEntity(request);
-    variant.setProduct(product);
+    // check variant or sku not exist
+    if (product.getVariants().isEmpty()
+        || !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(
+            request.getSku_id(), product.getId())) {
+      var variant = mapper.productUpdateDtoToVariantEntity(request);
+      variant.setProduct(product);
+      if (product.getVariants() == null) {
+        product.setVariants(new HashSet<>());
+      }
+      product.getVariants().add(variant);
+      variantRepository.save(variant);
+      productRepository.save(product);
 
-    if (product.getVariants() == null) {
-      product.setVariants(new HashSet<>());
+      return variant;
     }
-    product.getVariants().add(variant);
-    variantRepository.save(variant);
-    productRepository.save(product);
 
-    return variant;
+    var oldVariant =
+        variantRepository
+            .findBySkuIdAndDeletedAtIsNull(request.getSku_id())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.VARIANT_NOT_FOUND));
+    return mapper.updateVariantFromDto(request, oldVariant);
   }
 
   @Override
-  public VariantEntity updateProductVariant(
-      ProductUpdateDto request, VariantEntity variant, ProductEntity product) {
-    var newVariant = mapper.updateVariantFromDto(request, variant);
-    // check skuId existed
-    if (request.getSku_id() != null && !request.getSku_id().equals(variant.getSku_id())) {
-      if (variantRepository.existsBySkuIdAndDeletedAtIsNull(request.getSku_id())) {
-        throw new CustomRuntimeException(ErrorCode.SKU_ID_EXISTED);
-      }
-      newVariant.setSku_id(request.getSku_id());
+  public void deleteByProduct(ProductEntity product) {
+    var variant = variantRepository.findByProductIdAndDeletedAtIsNull(product.getId());
+    if (variant.isPresent()) {
+
+      variant.get().setDeletedAt(LocalDateTime.now());
+      variantRepository.save(variant.get());
     }
-    newVariant.setProduct(product);
-    return variantRepository.save(newVariant);
+  }
+
+  private boolean isSkuIdTakenByAnotherProduct(String skuId, String productId) {
+    return variantRepository.existsBySkuIdAndDeletedAtIsNull(skuId)
+        && !variantRepository.existsBySkuIdAndProductIdAndDeletedAtIsNull(skuId, productId);
   }
 }

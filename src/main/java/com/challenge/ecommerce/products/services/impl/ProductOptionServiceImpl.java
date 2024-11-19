@@ -2,7 +2,6 @@ package com.challenge.ecommerce.products.services.impl;
 
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
-import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
 import com.challenge.ecommerce.products.controllers.dto.ProductOptionCreateDto;
 import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.models.ProductEntity;
@@ -18,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,26 +27,6 @@ public class ProductOptionServiceImpl implements IProductOptionService {
   OptionRepository optionRepository;
   ProductOptionRepository productOptionRepository;
   IProductOptionValueService productOptionValueService;
-
-  @Override
-  public void addProductOption(ProductCreateDto request, ProductEntity product) {
-    List<ProductOptionEntity> options =
-        request.getOptions().stream()
-            .map(
-                child -> {
-                  var option =
-                      optionRepository
-                          .findByIdAndDeletedAtIsNull(child.getIdOption())
-                          .orElseThrow(
-                              () -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
-                  ProductOptionEntity entity = new ProductOptionEntity();
-                  entity.setOption(option);
-                  entity.setProduct(product);
-                  return entity;
-                })
-            .toList();
-    productOptionRepository.saveAll(options);
-  }
 
   @Override
   public void updateProductOptionAndOptionValues(
@@ -78,18 +56,6 @@ public class ProductOptionServiceImpl implements IProductOptionService {
 
       // Update OptionValue
       productOptionValueService.updateOptionValues(optionDto, productOption, variant);
-    }
-
-    // Remove the option that is not included in the request
-    List<String> requestOptionIds =
-        request.getOptions().stream().map(ProductOptionCreateDto::getIdOption).toList();
-    List<ProductOptionEntity> optionsToRemove =
-        currentOptions.stream()
-            .filter(option -> !requestOptionIds.contains(option.getOption().getId()))
-            .toList();
-    for (ProductOptionEntity optionToRemove : optionsToRemove) {
-      optionToRemove.setDeletedAt(LocalDateTime.now());
-      productOptionRepository.save(optionToRemove);
     }
   }
 }

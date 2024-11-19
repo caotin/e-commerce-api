@@ -8,7 +8,6 @@ import com.challenge.ecommerce.products.models.ProductEntity;
 import com.challenge.ecommerce.products.repositories.ImageRepository;
 import com.challenge.ecommerce.products.services.IImageService;
 import com.challenge.ecommerce.utils.enums.TypeImage;
-import com.challenge.ecommerce.utils.StringHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,29 +26,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ImageServiceImpl implements IImageService {
   ImageRepository imageRepository;
-
-  @Override
-  public void saveImage(List<ProductImageCreateDto> list, ProductEntity product) {
-    // Collect and check requested avatar, thumbnail URLs
-    String newAvatarUrl = null;
-    Set<String> newThumbnailUrls = new HashSet<>();
-    collectUrlImages(list, newAvatarUrl, newThumbnailUrls);
-    List<ImageEntity> imageEntities =
-        list.stream()
-            .map(
-                child -> {
-                  ImageEntity imageEntity = new ImageEntity();
-                  if (!StringHelper.isValidImageUrl(child.getImages_url())) {
-                    throw new CustomRuntimeException(ErrorCode.INVALID_IMAGE_URL);
-                  }
-                  imageEntity.setImages_url(child.getImages_url());
-                  imageEntity.setType_image(child.getType_image());
-                  imageEntity.setProduct(product);
-                  return imageEntity;
-                })
-            .toList();
-    imageRepository.saveAll(imageEntities);
-  }
 
   @Override
   public void updateImage(List<ProductImageCreateDto> list, ProductEntity product) {
