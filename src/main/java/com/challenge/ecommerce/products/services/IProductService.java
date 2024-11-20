@@ -16,4 +16,6 @@ public interface IProductService {
   ProductResponse updateProductBySlug(ProductUpdateDto request, String productSlug);
 
   void deleteProductBySlug(String productSlug);
+
+  Integer getTotalStock(String categoryId);
 }
