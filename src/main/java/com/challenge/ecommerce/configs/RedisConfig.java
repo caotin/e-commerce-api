@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -30,16 +29,12 @@ public class RedisConfig {
       RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
       configuration.setHostName(redisUri.getHost());
       configuration.setPort(redisUri.getPort());
-      
+
       if (redisUri.getUserInfo() != null) {
         configuration.setPassword(redisUri.getUserInfo().split(":", 2)[1]);
       }
-      
-      LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-        .useSsl()
-        .build();
-      
-      return new LettuceConnectionFactory(configuration, clientConfig);
+
+      return new LettuceConnectionFactory(configuration);
     } catch (URISyntaxException e) {
       throw new RuntimeException("Redis URL is invalid", e);
     }
