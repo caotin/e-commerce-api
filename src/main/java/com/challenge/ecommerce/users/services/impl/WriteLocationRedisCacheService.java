@@ -19,7 +19,6 @@ public class WriteLocationRedisCacheService {
   LocationApiService locationApiService;
   RedisTemplate<String, Object> redisTemplate;
 
-  @PostConstruct
   public void cacheAllLocation() {
     if (redisTemplate.opsForHash().size("provinces") == 0) {
       List<Province> provinces = locationApiService.getAllProvinces();
