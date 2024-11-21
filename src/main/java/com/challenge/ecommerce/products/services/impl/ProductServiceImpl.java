@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -137,7 +135,7 @@ public class ProductServiceImpl implements IProductService {
         .totalPages(products.getTotalPages())
         .result(productResponses)
         .total(products.getTotalElements())
-        .page(pageable.getPageNumber())
+        .page(pageable.getPageNumber() + 1)
         .limit(products.getNumberOfElements())
         .message("Get list product successfully")
         .build();
@@ -250,6 +248,21 @@ public class ProductServiceImpl implements IProductService {
       }
     }
     return productStock;
+  }
+
+  @Override
+  public Map<String, Integer> getBatchTotalStock(List<String> categoryIds) {
+    List<Object[]> results = productRepository.findByCategoryIdsAndDeletedAtIsNull(categoryIds);
+
+    // Covert the result to map
+    Map<String, Integer> stockMap = new HashMap<>();
+    for (Object[] result : results) {
+      String categoryId = (String) result[0]; // categoryId
+      Long totalStock = (Long) result[1]; // totalStock
+      stockMap.put(categoryId, totalStock.intValue());
+    }
+
+    return stockMap;
   }
 
   void setListImage(ProductResponse resp, ProductEntity product) {

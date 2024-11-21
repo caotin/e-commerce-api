@@ -28,7 +28,7 @@ public class ProductController {
 
   IProductService productService;
 
-  static final String DEFAULT_FILTER_PAGE = "0";
+  static final String DEFAULT_FILTER_PAGE = "1";
   static final String DEFAULT_FILTER_SIZE = "10";
   static final Sort DEFAULT_FILTER_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
   static final Sort DEFAULT_FILTER_SORT_ASC = Sort.by(Sort.Direction.ASC, "createdAt");
@@ -43,8 +43,8 @@ public class ProductController {
 
   @GetMapping
   public ResponseEntity<?> getAllProducts(
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(0) int page,
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(0) int size,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(1) int size,
       @RequestParam(required = false) String sortParam,
       @RequestParam(required = false) String category,
       @RequestParam(required = false) @Min(0) Integer minPrice,
@@ -56,7 +56,7 @@ public class ProductController {
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page, size, sort);
+    Pageable pageable = PageRequest.of(page-1, size, sort);
     var listProducts = productService.getListProducts(pageable, category, minPrice, maxPrice);
     return ResponseEntity.ok(listProducts);
   }

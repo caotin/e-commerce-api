@@ -6,6 +6,9 @@ import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.utils.ApiResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+import java.util.Map;
+
 public interface IProductService {
   ProductResponse addProduct(ProductCreateDto request);
 
@@ -18,4 +21,6 @@ public interface IProductService {
   void deleteProductBySlug(String productSlug);
 
   Integer getTotalStock(String categoryId);
+
+  Map<String, Integer> getBatchTotalStock(List<String> categoryIds);
 }

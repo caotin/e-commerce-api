@@ -8,6 +8,7 @@ import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.StringHelper;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +28,7 @@ public class CategoryController {
 
   ICategoryService categoryService;
 
-  static final String DEFAULT_FILTER_PAGE = "0";
+  static final String DEFAULT_FILTER_PAGE = "1";
   static final String DEFAULT_FILTER_SIZE = "10";
   static final Sort DEFAULT_FILTER_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
   static final Sort DEFAULT_FILTER_SORT_ASC = Sort.by(Sort.Direction.ASC, "createdAt");
@@ -42,14 +43,14 @@ public class CategoryController {
 
   @GetMapping
   public ResponseEntity<?> getAllCategories(
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) int page,
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) int size,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(0) int size,
       @RequestParam(required = false) String sortParam) {
     Sort sort = DEFAULT_FILTER_SORT;
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page, size, sort);
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
     var listCategories = categoryService.getListCategories(pageable);
     return ResponseEntity.ok(listCategories);
   }
@@ -83,15 +84,15 @@ public class CategoryController {
 
   @GetMapping("/by-parent/{categoryParentSlug}")
   public ResponseEntity<?> getCategoryByParentName(
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) int page,
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) int size,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(0) int size,
       @RequestParam(required = false) String sortParam,
       @PathVariable("categoryParentSlug") String categoryParentSlug) {
     Sort sort = DEFAULT_FILTER_SORT;
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page, size, sort);
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
     String formattedSlug = StringHelper.toSlug(categoryParentSlug);
     var listCategories = categoryService.getListCategoriesByParentSlug(pageable, formattedSlug);
     return ResponseEntity.ok(listCategories);

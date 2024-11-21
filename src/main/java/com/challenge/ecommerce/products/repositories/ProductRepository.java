@@ -22,4 +22,9 @@ public interface ProductRepository
 
   @Query("SELECT b FROM products b WHERE b.category.id=:categoryId AND b.deletedAt IS NULL")
   List<ProductEntity> findByCategoryIdAndDeletedAtIsNull(@Param("categoryId") String categoryId);
+
+  @Query(
+      "SELECT c.id AS categoryId, SUM(v.stock_quantity) AS totalStock FROM categories c JOIN products p ON c.id = p.category.id LEFT JOIN variants v ON p.id = v.product.id WHERE c.id IN (:categoryIds) AND p.deletedAt IS NULL GROUP BY c.id")
+  List<Object[]> findByCategoryIdsAndDeletedAtIsNull(
+      @Param("categoryIds") List<String> categoryIds);
 }
