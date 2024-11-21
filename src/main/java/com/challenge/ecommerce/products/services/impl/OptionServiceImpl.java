@@ -60,7 +60,7 @@ public class OptionServiceImpl implements IOptionService {
         .totalPages(options.getTotalPages())
         .result(optionResponses)
         .total(options.getTotalElements())
-        .page(pageable.getPageNumber()+1)
+        .page(pageable.getPageNumber() + 1)
         .limit(options.getNumberOfElements())
         .message("Get List Options Successfully")
         .build();
@@ -73,8 +73,11 @@ public class OptionServiceImpl implements IOptionService {
             .findByIdAndDeletedAtIsNull(optionId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
     var optionName =
-        request.getOption_name() == null ? oldOption.getOption_name() : request.getOption_name();
-    if (optionName == null) throw new CustomRuntimeException(ErrorCode.OPTION_NAME_CANNOT_BE_NULL);
+        request.getOption_name().trim().isEmpty()
+            ? oldOption.getOption_name()
+            : request.getOption_name();
+    if (optionName.trim().isEmpty())
+      throw new CustomRuntimeException(ErrorCode.OPTION_NAME_CANNOT_BE_NULL);
     if (optionRepository.existsByOptionNameAndDeletedAtIsNull(request.getOption_name())) {
       throw new CustomRuntimeException(ErrorCode.OPTION_NAME_EXISTED);
     }

@@ -68,11 +68,13 @@ public class OptionValueServiceImpl implements IOptionValueService {
     if (option == null || option.getDeletedAt() != null) {
       throw new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND);
     }
+    checkExistsOptionValueName(option, request.getValueName());
     var optionValueName =
-        request.getValueName() == null ? oldOptionValue.getValue_name() : request.getValueName();
-    if (optionValueName == null || optionValueName.isEmpty())
+        request.getValueName().trim().isEmpty()
+            ? oldOptionValue.getValue_name()
+            : request.getValueName();
+    if (optionValueName.trim().isEmpty())
       throw new CustomRuntimeException(ErrorCode.INVALID_OPTION_VALUE_NAME);
-    checkExistsOptionValueName(option, optionValueName);
     var newOptionValue = optionValueMapper.updateOptionValueFromDto(request, oldOptionValue);
     newOptionValue.setValue_name(StringHelper.changeFirstCharacterCase(optionValueName));
     optionValueRepository.save(newOptionValue);
