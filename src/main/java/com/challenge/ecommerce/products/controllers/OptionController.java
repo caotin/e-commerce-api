@@ -29,7 +29,7 @@ public class OptionController {
   IOptionService optionService;
   IOptionValueService optionValueService;
 
-  static final String DEFAULT_FILTER_PAGE = "0";
+  static final String DEFAULT_FILTER_PAGE = "1";
   static final String DEFAULT_FILTER_SIZE = "10";
   static final Sort DEFAULT_FILTER_SORT = Sort.by(Sort.Direction.DESC, "createdAt");
   static final Sort DEFAULT_FILTER_SORT_ASC = Sort.by(Sort.Direction.ASC, "createdAt");
@@ -53,14 +53,14 @@ public class OptionController {
 
   @GetMapping
   public ResponseEntity<?> getAllOptions(
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(0) int page,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(0) int size,
       @RequestParam(required = false) String sortParam) {
     Sort sort = DEFAULT_FILTER_SORT;
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page, size, sort);
+    Pageable pageable = PageRequest.of(page-1, size, sort);
     var listOptions = optionService.getListOptions(pageable);
     return ResponseEntity.ok(listOptions);
   }

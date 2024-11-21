@@ -64,14 +64,10 @@ public class OptionValueServiceImpl implements IOptionValueService {
         optionValueRepository
             .findByIdAndDeletedAtIsNull(optionValueId)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
-    var optionId =
-        optionRepository
-            .findByOptionValueIdAndDeletedAtIsNull(optionValueId)
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
-    var option =
-        optionRepository
-            .findByIdAndDeletedAtIsNull(optionId)
-            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND));
+    var option = oldOptionValue.getOption();
+    if (option == null || option.getDeletedAt() != null) {
+      throw new CustomRuntimeException(ErrorCode.OPTION_NOT_FOUND);
+    }
     var optionValueName =
         request.getValueName() == null ? oldOptionValue.getValue_name() : request.getValueName();
     if (optionValueName == null || optionValueName.isEmpty())
@@ -118,7 +114,11 @@ public class OptionValueServiceImpl implements IOptionValueService {
     if (option.getOptionValues() != null) {
       List<OptionValueEntity> optionValueEntities =
           option.getOptionValues().stream()
-              .peek(optionValue -> optionValue.setDeletedAt(LocalDateTime.now()))
+              .map(
+                  optionValue -> {
+                    optionValue.setDeletedAt(LocalDateTime.now());
+                    return optionValue;
+                  })
               .toList();
       optionValueRepository.saveAll(optionValueEntities);
     }
