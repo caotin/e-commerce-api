@@ -54,7 +54,7 @@ public class OptionController {
   @GetMapping
   public ResponseEntity<?> getAllOptions(
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
-      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(0) int size,
+      @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(1) int size,
       @RequestParam(required = false) String sortParam) {
     Sort sort = DEFAULT_FILTER_SORT;
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
