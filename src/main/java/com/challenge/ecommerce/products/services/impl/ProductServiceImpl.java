@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,8 +63,17 @@ public class ProductServiceImpl implements IProductService {
     product.setSlug(slug);
     product.setTitle(title);
     productRepository.save(product);
-
-    return mapper.productEntityToDto(product);
+    var resp = mapper.productEntityToDto(product);
+    resp.getCategory().setProductStock(getTotalStock(category.getId()));
+    if (resp.getCategory().getChildCategories() != null) {
+      resp.getCategory()
+          .getChildCategories()
+          .forEach(
+              childCategory -> {
+                childCategory.setProductStock(getTotalStock(childCategory.getId()));
+              });
+    }
+    return resp;
   }
 
   @Override
@@ -109,6 +116,18 @@ public class ProductServiceImpl implements IProductService {
                   var response = mapper.productEntityToDto(product);
                   setListImage(response, product);
                   setListVariant(response, product);
+                  response
+                      .getCategory()
+                      .setProductStock(getTotalStock(product.getCategory().getId()));
+                  if (response.getCategory().getChildCategories() != null) {
+                    response
+                        .getCategory()
+                        .getChildCategories()
+                        .forEach(
+                            childCategory -> {
+                              childCategory.setProductStock(getTotalStock(childCategory.getId()));
+                            });
+                  }
                   return response;
                 })
             .toList();
@@ -116,7 +135,7 @@ public class ProductServiceImpl implements IProductService {
         .totalPages(products.getTotalPages())
         .result(productResponses)
         .total(products.getTotalElements())
-        .page(pageable.getPageNumber())
+        .page(pageable.getPageNumber() + 1)
         .limit(products.getNumberOfElements())
         .message("Get list product successfully")
         .build();
@@ -131,6 +150,15 @@ public class ProductServiceImpl implements IProductService {
     var resp = mapper.productEntityToDto(product);
     setListVariant(resp, product);
     setListImage(resp, product);
+    resp.getCategory().setProductStock(getTotalStock(product.getCategory().getId()));
+    if (resp.getCategory().getChildCategories() != null) {
+      resp.getCategory()
+          .getChildCategories()
+          .forEach(
+              childCategory -> {
+                childCategory.setProductStock(getTotalStock(childCategory.getId()));
+              });
+    }
     return resp;
   }
 
@@ -183,6 +211,16 @@ public class ProductServiceImpl implements IProductService {
 
     // set variant
     setListVariant(resp, newProduct);
+    // set product stock
+    resp.getCategory().setProductStock(getTotalStock(newProduct.getCategory().getId()));
+    if (resp.getCategory().getChildCategories() != null) {
+      resp.getCategory()
+          .getChildCategories()
+          .forEach(
+              childCategory -> {
+                childCategory.setProductStock(getTotalStock(childCategory.getId()));
+              });
+    }
     // set review
     return resp;
   }
@@ -196,6 +234,35 @@ public class ProductServiceImpl implements IProductService {
     product.setDeletedAt(LocalDateTime.now());
     variantService.deleteByProduct(product);
     productRepository.save(product);
+  }
+
+  @Override
+  public Integer getTotalStock(String categoryId) {
+    var products = productRepository.findByCategoryIdAndDeletedAtIsNull(categoryId);
+    int productStock = 0;
+    for (var product : products) {
+      if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+        for (var variant : product.getVariants()) {
+          productStock += variant.getStock_quantity();
+        }
+      }
+    }
+    return productStock;
+  }
+
+  @Override
+  public Map<String, Integer> getBatchTotalStock(List<String> categoryIds) {
+    List<Object[]> results = productRepository.findByCategoryIdsAndDeletedAtIsNull(categoryIds);
+
+    // Covert the result to map
+    Map<String, Integer> stockMap = new HashMap<>();
+    for (Object[] result : results) {
+      String categoryId = (String) result[0]; // categoryId
+      Long totalStock = (Long) result[1]; // totalStock
+      stockMap.put(categoryId, totalStock.intValue());
+    }
+
+    return stockMap;
   }
 
   void setListImage(ProductResponse resp, ProductEntity product) {

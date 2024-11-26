@@ -23,6 +23,8 @@ public class CategoryResponse {
 
   @NotBlank String slug;
 
+  int productStock;
+
   CategoryParentResponse parentCategory;
 
   List<CategoryResponse> childCategories;

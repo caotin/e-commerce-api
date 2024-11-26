@@ -9,6 +9,7 @@ import com.challenge.ecommerce.categories.repositories.CategoryRepository;
 import com.challenge.ecommerce.categories.services.ICategoryService;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
+import com.challenge.ecommerce.products.services.IProductService;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.StringHelper;
 import lombok.AccessLevel;
@@ -28,7 +29,8 @@ import java.util.List;
 public class CategoryServiceImpl implements ICategoryService {
 
   CategoryRepository categoryRepository;
-  final ICategoryMapper mapper;
+  ICategoryMapper mapper;
+  IProductService productService;
 
   @Override
   public CategoryResponse addCategory(CategoryCreateDto request) {
@@ -46,12 +48,15 @@ public class CategoryServiceImpl implements ICategoryService {
               .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_PARENT_NOT_FOUND));
       category.setParentCategory(parentCategory);
     }
-    if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+    if (request.getImageUrl() != null && !request.getImageUrl().trim().isEmpty()) {
       category.setCategory_img(request.getImageUrl());
     }
     categoryRepository.save(category);
     // mapper entity to dto
-    return mapper.categoryEntityToDto(category);
+    var resp = mapper.categoryEntityToDto(category);
+    int productStock = productService.getTotalStock(category.getId());
+    resp.setProductStock(productStock);
+    return resp;
   }
 
   @Override
@@ -63,6 +68,8 @@ public class CategoryServiceImpl implements ICategoryService {
                 category -> {
                   var resp = mapper.categoryEntityToDto(category);
                   setListCategoryParent(resp, category);
+                  int productStock = productService.getTotalStock(category.getId());
+                  resp.setProductStock(productStock);
                   return resp;
                 })
             .toList();
@@ -70,7 +77,7 @@ public class CategoryServiceImpl implements ICategoryService {
         .totalPages(categories.getTotalPages())
         .result(categoryResponses)
         .total(categories.getTotalElements())
-        .page(pageable.getPageNumber())
+        .page(pageable.getPageNumber() + 1)
         .limit(categories.getNumberOfElements())
         .message("Get list category successfully")
         .build();
@@ -89,6 +96,8 @@ public class CategoryServiceImpl implements ICategoryService {
       resp.setParentCategory(mapper.categoryEntityToParentDto(parentCategory.get()));
     }
     setListCategoryParent(resp, category);
+    int productStock = productService.getTotalStock(category.getId());
+    resp.setProductStock(productStock);
     return resp;
   }
 
@@ -98,7 +107,7 @@ public class CategoryServiceImpl implements ICategoryService {
         categoryRepository
             .findBySlugAndDeletedAt(categorySlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.CATEGORY_NOT_FOUND));
-    if (request.getName() != null
+    if (!request.getName().trim().isEmpty()
         && categoryRepository.existsByNameAndDeletedAtIsNull(request.getName())
         && !request.getName().equals(oldCategory.getName())) {
       throw new CustomRuntimeException(ErrorCode.CATEGORY_EXISTED);
@@ -118,12 +127,14 @@ public class CategoryServiceImpl implements ICategoryService {
       newCategory.setParentCategory(parentCategory);
     }
     // Thêm xử lý cho hình ảnh mới
-    if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+    if (request.getImageUrl() != null && !request.getImageUrl().trim().isEmpty()) {
       newCategory.setCategory_img(request.getImageUrl());
     }
     categoryRepository.save(newCategory);
     var resp = mapper.categoryEntityToDto(newCategory);
     setListCategoryParent(resp, newCategory);
+    int productStock = productService.getTotalStock(newCategory.getId());
+    resp.setProductStock(productStock);
     return resp;
   }
 
@@ -151,7 +162,7 @@ public class CategoryServiceImpl implements ICategoryService {
         .totalPages(categories.getTotalPages())
         .result(categoryResponses)
         .total(categories.getTotalElements())
-        .page(pageable.getPageNumber())
+        .page(pageable.getPageNumber() + 1)
         .limit(categories.getNumberOfElements())
         .message("Get list category by parent name successfully")
         .build();
@@ -160,8 +171,17 @@ public class CategoryServiceImpl implements ICategoryService {
   void setListCategoryParent(CategoryResponse resp, CategoryEntity newCategory) {
     if (newCategory.getChildCategories() != null) {
       var listCategoryParent = categoryRepository.findByParentIdAndDeletedAt(newCategory.getId());
+      var categoryIds = listCategoryParent.stream().map(CategoryEntity::getId).toList();
+      var stockMap = productService.getBatchTotalStock(categoryIds);
       List<CategoryResponse> categoryResponses =
-          listCategoryParent.stream().map(mapper::categoryEntityToDto).toList();
+          listCategoryParent.stream()
+              .map(
+                  category -> {
+                    var childResp = mapper.categoryEntityToDto(category);
+                    childResp.setProductStock(stockMap.getOrDefault(category.getId(), 0));
+                    return childResp;
+                  })
+              .toList();
       resp.setChildCategories(categoryResponses);
     }
   }

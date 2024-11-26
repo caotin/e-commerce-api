@@ -30,6 +30,7 @@ public class ProductUpdateDto {
   @Min(value = 0, message = "Stock quantity must be non-negative")
   Integer stock_quantity;
 
+  @NotBlank(message = "SkuId must not be null")
   String sku_id;
 
   @NotEmpty(message = "Option list cannot be empty")

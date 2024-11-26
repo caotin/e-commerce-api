@@ -1,6 +1,6 @@
 package com.challenge.ecommerce.categories.controllers.dto;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryCreateDto {
-  @NotEmpty(message = "Category name must not be empty")
+  @NotBlank(message = "Category name must not be empty")
   String name;
 
   String parentCategoryId;
