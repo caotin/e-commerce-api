@@ -1,7 +1,5 @@
 package com.challenge.ecommerce.products.controllers.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,8 +9,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OptionCreateDto {
-  @NotEmpty(message = "Option name must not be empty")
-  @NotBlank(message = "Option name must not be empty")
+public class OptionUpdateDto {
   String option_name;
 }
