@@ -86,15 +86,14 @@ public class SecurityConfig {
   }
 
   @Bean
-  public CorsFilter corsFilter() {
-    CorsConfiguration config = new CorsConfiguration();
-    config.addAllowedOrigin("*");
-    config.addAllowedMethod("*");
-    config.addAllowedHeader("*");
-    UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource =
-        new UrlBasedCorsConfigurationSource();
-    urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", config);
-    return new CorsFilter(urlBasedCorsConfigurationSource);
+  UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.addAllowedOrigin("*");
+    configuration.addAllowedMethod("*");
+    configuration.addAllowedHeader("*");
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   @Bean
