@@ -4,6 +4,9 @@ import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.files.services.IFileService;
 import com.challenge.ecommerce.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +28,17 @@ public class FileController {
   IFileService fileService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value =
+                          "{\n"
+                              + "   \"message\": \"String\",\n"
+                              + "   \"result\": \"String\"\n"
+                              + "}")))
   public ResponseEntity<?> updateImage(@RequestParam MultipartFile file) {
     if (file == null || file.isEmpty()) {
       throw new CustomRuntimeException(ErrorCode.IMAGE_NOT_FOUND);

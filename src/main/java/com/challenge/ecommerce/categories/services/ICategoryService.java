@@ -5,12 +5,13 @@ import com.challenge.ecommerce.categories.controllers.dto.CategoryResponse;
 import com.challenge.ecommerce.categories.controllers.dto.CategoryUpdateDto;
 import com.challenge.ecommerce.utils.ApiResponse;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ICategoryService {
   CategoryResponse addCategory(CategoryCreateDto request);
 
-  ApiResponse<?> getListCategories(Pageable pageable);
+  ApiResponse<List<CategoryResponse>> getListCategories(Pageable pageable);
 
   CategoryResponse getCategoryBySlug(String categorySlug);
 
@@ -18,5 +19,6 @@ public interface ICategoryService {
 
   void deleteCategory(String id);
 
-  ApiResponse<?> getListCategoriesByParentSlug(Pageable pageable, String categoryParentSlug);
+  ApiResponse<List<CategoryResponse>> getListCategoriesByParentSlug(
+      Pageable pageable, String categoryParentSlug);
 }

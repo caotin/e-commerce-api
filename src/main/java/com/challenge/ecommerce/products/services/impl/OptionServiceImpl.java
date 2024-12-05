@@ -45,7 +45,7 @@ public class OptionServiceImpl implements IOptionService {
   }
 
   @Override
-  public ApiResponse<?> getListOptions(Pageable pageable) {
+  public ApiResponse<List<OptionResponse>> getListOptions(Pageable pageable) {
     var options = optionRepository.findAllByDeletedAtIsNull(pageable);
     List<OptionResponse> optionResponses =
         options.stream()
@@ -56,7 +56,7 @@ public class OptionServiceImpl implements IOptionService {
                   return resp;
                 })
             .toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<OptionResponse>>builder()
         .totalPages(options.getTotalPages())
         .result(optionResponses)
         .total(options.getTotalElements())

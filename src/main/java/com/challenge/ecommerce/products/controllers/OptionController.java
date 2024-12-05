@@ -1,12 +1,12 @@
 package com.challenge.ecommerce.products.controllers;
 
-import com.challenge.ecommerce.products.controllers.dto.OptionCreateDto;
-import com.challenge.ecommerce.products.controllers.dto.OptionUpdateDto;
-import com.challenge.ecommerce.products.controllers.dto.OptionValueCreateDto;
-import com.challenge.ecommerce.products.controllers.dto.OptionValueUpdateDto;
+import com.challenge.ecommerce.products.controllers.dto.*;
 import com.challenge.ecommerce.products.services.IOptionService;
 import com.challenge.ecommerce.products.services.IOptionValueService;
 import com.challenge.ecommerce.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/options")
@@ -35,6 +37,8 @@ public class OptionController {
   static final Sort DEFAULT_FILTER_SORT_ASC = Sort.by(Sort.Direction.ASC, "createdAt");
 
   @PostMapping
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> addOption(@RequestBody @Valid OptionCreateDto request) {
     var option = optionService.addOption(request);
     var resp =
@@ -43,6 +47,8 @@ public class OptionController {
   }
 
   @PostMapping("/values/{optionId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> addOptionValue(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionValueCreateDto request) {
     var optionValue = optionValueService.addOptionValue(optionId, request);
@@ -52,7 +58,7 @@ public class OptionController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getAllOptions(
+  public ResponseEntity<ApiResponse<List<OptionResponse>>> getAllOptions(
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(1) int size,
       @RequestParam(required = false) String sortParam) {
@@ -60,12 +66,14 @@ public class OptionController {
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page-1, size, sort);
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
     var listOptions = optionService.getListOptions(pageable);
-    return ResponseEntity.ok(listOptions);
+    return ResponseEntity.ok().body(listOptions);
   }
 
   @PutMapping("/{optionId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> updateOption(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionUpdateDto request) {
     var option = optionService.updateOption(request, optionId);
@@ -74,6 +82,8 @@ public class OptionController {
   }
 
   @PutMapping("/values/{optionValueId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> updateOptionValue(
       @PathVariable("optionValueId") String optionValueId,
       @RequestBody @Valid OptionValueUpdateDto request) {
@@ -87,6 +97,8 @@ public class OptionController {
   }
 
   @GetMapping("/{optionId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> getOption(@PathVariable("optionId") String optionId) {
     var option = optionService.getOptionById(optionId);
     var resp = ApiResponse.builder().result(option).message("Get option successfully").build();
@@ -94,13 +106,23 @@ public class OptionController {
   }
 
   @GetMapping("/values/{optionValueId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> getOptionValue(@PathVariable("optionValueId") String optionValueId) {
     var optionValue = optionValueService.getOptionValue(optionValueId);
-    var resp = ApiResponse.builder().result(optionValue).message("Get option value successfully").build();
+    var resp =
+        ApiResponse.builder().result(optionValue).message("Get option value successfully").build();
     return ResponseEntity.ok(resp);
   }
 
   @DeleteMapping("/{optionId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value = "{\n" + "  \"message\": \"Delete option successfully\"\n" + "}")))
   public ResponseEntity<?> deleteOption(@PathVariable("optionId") String optionId) {
     optionService.deleteOption(optionId);
     var resp = ApiResponse.builder().message("Delete option successfully").build();
@@ -108,6 +130,14 @@ public class OptionController {
   }
 
   @DeleteMapping("/values/{optionValueId}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value =
+                          "{\n" + "  \"message\": \"Delete option value successfully\"\n" + "}")))
   public ResponseEntity<?> deleteOptionValue(@PathVariable("optionValueId") String optionValueId) {
     optionValueService.deleteOptionValue(optionValueId);
     var resp = ApiResponse.builder().message("Delete option value successfully").build();
