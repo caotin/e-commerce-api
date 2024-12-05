@@ -12,7 +12,7 @@ import java.util.Map;
 public interface IProductService {
   ProductResponse addProduct(ProductCreateDto request);
 
-  ApiResponse<?> getListProducts(Pageable pageable, String category, Integer min, Integer max);
+  ApiResponse<List<ProductResponse>> getListProducts(Pageable pageable, String category, Integer min, Integer max);
 
   ProductResponse getProductBySlug(String productSlug);
 

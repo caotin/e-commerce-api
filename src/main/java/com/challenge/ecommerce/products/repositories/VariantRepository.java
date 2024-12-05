@@ -17,9 +17,14 @@ public interface VariantRepository extends JpaRepository<VariantEntity, String> 
   @Query("SELECT b FROM variants b WHERE b.sku_id =:skuId AND b.deletedAt IS NULL")
   Optional<VariantEntity> findBySkuIdAndDeletedAtIsNull(@Param("skuId") String skuId);
 
-  @Query("SELECT COUNT(c) > 0 FROM variants c INNER JOIN products b ON c.product.id = b.id WHERE c.sku_id = :skuId AND c.product.id =:productId AND c.deletedAt IS NULL AND b.deletedAt IS NULL")
-  Boolean existsBySkuIdAndProductIdAndDeletedAtIsNull(@Param("skuId") String skuId, @Param("productId") String productId);
+  @Query(
+      "SELECT COUNT(c) > 0 FROM variants c INNER JOIN products b ON c.product.id = b.id WHERE c.sku_id = :skuId AND c.product.id =:productId AND c.deletedAt IS NULL AND b.deletedAt IS NULL")
+  Boolean existsBySkuIdAndProductIdAndDeletedAtIsNull(
+      @Param("skuId") String skuId, @Param("productId") String productId);
 
   @Query("SELECT b FROM variants b WHERE b.product.id =:productId AND b.deletedAt IS NULL")
-  Optional<VariantEntity> findByProductIdAndDeletedAtIsNull(@Param("productId") String productId);
+  List<VariantEntity> findByProductIdAndDeletedAtIsNull(@Param("productId") String productId);
+
+  @Query("SELECT b FROM variants b WHERE b.id=:id AND b.deletedAt IS NULL")
+  Optional<VariantEntity> findByIdAndDeletedAtIsNull(@Param("id") String id);
 }
