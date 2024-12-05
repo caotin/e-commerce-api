@@ -59,16 +59,12 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
     List<VariantValueEntity> valuesToRemove =
         currentValues.stream()
             .filter(
-                value -> !optionValue.getId().contains(value.getOptionValue().getId()))
+                value -> !optionValue.getId().equals(value.getOptionValue().getId()))
             .toList();
-    log.info("currentValues {} ",currentValues.size());
-    log.info("valuesToRemove: {}", valuesToRemove.size());
     for (VariantValueEntity valueToRemove : valuesToRemove) {
       valueToRemove.setDeletedAt(LocalDateTime.now());
       variantValueRepository.save(valueToRemove);
-      log.info("Removed variant value {}", valueToRemove.getOptionValue().getValue_name());
     }
-    log.info("change option value");
   }
 
   @Override
