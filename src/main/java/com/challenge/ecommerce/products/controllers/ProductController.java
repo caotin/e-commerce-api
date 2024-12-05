@@ -3,10 +3,14 @@ package com.challenge.ecommerce.products.controllers;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.products.controllers.dto.ProductCreateDto;
+import com.challenge.ecommerce.products.controllers.dto.ProductResponse;
 import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.services.IProductService;
 import com.challenge.ecommerce.utils.ApiResponse;
 import com.challenge.ecommerce.utils.StringHelper;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
@@ -18,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -34,6 +40,8 @@ public class ProductController {
   static final Sort DEFAULT_FILTER_SORT_ASC = Sort.by(Sort.Direction.ASC, "createdAt");
 
   @PostMapping
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = ProductResponse.class)))
   public ResponseEntity<?> addProduct(@RequestBody @Valid ProductCreateDto request) {
     var product = productService.addProduct(request);
     var resp =
@@ -42,7 +50,7 @@ public class ProductController {
   }
 
   @GetMapping
-  public ResponseEntity<?> getAllProducts(
+  public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_PAGE) @Min(1) int page,
       @RequestParam(required = false, defaultValue = DEFAULT_FILTER_SIZE) @Min(1) int size,
       @RequestParam(required = false) String sortParam,
@@ -56,31 +64,42 @@ public class ProductController {
     if (sortParam != null && sortParam.equalsIgnoreCase("ASC")) {
       sort = DEFAULT_FILTER_SORT_ASC;
     }
-    Pageable pageable = PageRequest.of(page-1, size, sort);
+    Pageable pageable = PageRequest.of(page - 1, size, sort);
     var listProducts = productService.getListProducts(pageable, category, minPrice, maxPrice);
-    return ResponseEntity.ok(listProducts);
+    return ResponseEntity.ok().body(listProducts);
   }
 
   @GetMapping("/{productSlug}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = ProductResponse.class)))
   public ResponseEntity<?> getProductBySlug(@PathVariable String productSlug) {
-    String formattedSlug = StringHelper.toSlug(productSlug);
+    String formattedSlug = StringHelper.toSlug(productSlug.trim());
     var product = productService.getProductBySlug(formattedSlug);
     var resp = ApiResponse.builder().result(product).message("Get Product Successfully").build();
     return ResponseEntity.ok(resp);
   }
 
   @PutMapping("/{productSlug}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content = @Content(schema = @Schema(implementation = ProductResponse.class)))
   public ResponseEntity<?> updateProductBySlug(
       @PathVariable String productSlug, @RequestBody @Valid ProductUpdateDto request) {
-    String formattedSlug = StringHelper.toSlug(productSlug);
+    String formattedSlug = StringHelper.toSlug(productSlug.trim());
     var product = productService.updateProductBySlug(request, formattedSlug);
     var resp = ApiResponse.builder().result(product).message("Update Product Successfully").build();
     return ResponseEntity.ok(resp);
   }
 
   @DeleteMapping("/{productSlug}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value = "{\n" + "  \"message\": \"Delete product successfully\"\n" + "}")))
   public ResponseEntity<?> deleteProductBySlug(@PathVariable String productSlug) {
-    String formattedSlug = StringHelper.toSlug(productSlug);
+    String formattedSlug = StringHelper.toSlug(productSlug.trim());
     productService.deleteProductBySlug(formattedSlug);
     var resp = ApiResponse.builder().message("Delete Product Successfully").build();
     return ResponseEntity.ok(resp);

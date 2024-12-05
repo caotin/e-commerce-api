@@ -3,9 +3,8 @@ package com.challenge.ecommerce.products.services.impl;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
 import com.challenge.ecommerce.products.controllers.dto.ProductOptionCreateDto;
-import com.challenge.ecommerce.products.models.ProductOptionEntity;
-import com.challenge.ecommerce.products.models.VariantEntity;
-import com.challenge.ecommerce.products.models.VariantValueEntity;
+import com.challenge.ecommerce.products.controllers.dto.VariantUpdateDto;
+import com.challenge.ecommerce.products.models.*;
 import com.challenge.ecommerce.products.repositories.OptionValueRepository;
 import com.challenge.ecommerce.products.repositories.VariantValueRepository;
 import com.challenge.ecommerce.products.services.IProductOptionValueService;
@@ -36,7 +35,7 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
     // check optionValue existed
     var optionValue =
         optionValueRepository
-            .findByIdAndDeletedAtIsNull(optionDto.getIdOptionValue())
+            .findByValueAndDeletedAtIsNull(optionDto.getValueName())
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
     // check if optionValue is in option
     if (!optionValue.getOption().getId().equals(productOption.getOption().getId())) {
@@ -44,7 +43,7 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
     }
     VariantValueEntity variantValue =
         currentValues.stream()
-            .filter(val -> val.getOptionValue().getId().equals(optionDto.getIdOptionValue()))
+            .filter(val -> val.getOptionValue().getId().equals(optionValue.getId()))
             .findFirst()
             .orElse(null);
     // If the optionValue does not exist, create a new one
@@ -59,11 +58,38 @@ public class ProductOptionValueServiceImpl implements IProductOptionValueService
     // Remove the optionValue that is not included in the request
     List<VariantValueEntity> valuesToRemove =
         currentValues.stream()
-            .filter(value -> !optionDto.getIdOptionValue().contains(value.getOptionValue().getId()))
+            .filter(
+                value -> !optionValue.getId().contains(value.getOptionValue().getId()))
             .toList();
+    log.info("currentValues {} ",currentValues.size());
+    log.info("valuesToRemove: {}", valuesToRemove.size());
     for (VariantValueEntity valueToRemove : valuesToRemove) {
       valueToRemove.setDeletedAt(LocalDateTime.now());
       variantValueRepository.save(valueToRemove);
+      log.info("Removed variant value {}", valueToRemove.getOptionValue().getValue_name());
     }
+    log.info("change option value");
+  }
+
+  @Override
+  public void createOptionValues(
+      ProductOptionCreateDto productOptionCreateDto,
+      ProductOptionEntity productOption,
+      VariantEntity variant) {
+    var optionValue =
+        optionValueRepository
+            .findByValueAndDeletedAtIsNull(productOptionCreateDto.getValueName())
+            .orElseThrow(() -> new CustomRuntimeException(ErrorCode.OPTION_VALUE_NOT_FOUND));
+    VariantValueEntity newVariantValue = new VariantValueEntity();
+    newVariantValue.setOption(productOption.getOption());
+    newVariantValue.setVariant(variant);
+    newVariantValue.setOptionValue(optionValue);
+    variantValueRepository.save(newVariantValue);
+  }
+
+  @Override
+  public void updateVariantValue(
+      VariantUpdateDto variantUpdateDto, ProductEntity product, VariantEntity newVariant) {
+
   }
 }
