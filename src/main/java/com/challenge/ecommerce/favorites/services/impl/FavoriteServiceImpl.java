@@ -93,7 +93,7 @@ public class FavoriteServiceImpl implements IFavoriteService {
   }
 
   @Override
-  public ApiResponse<?> getAllFavoriteByUser(Pageable pageable) {
+  public ApiResponse<List<FavoriteUserResponse>> getAllFavoriteByUser(Pageable pageable) {
     var user =
         userRepository
             .findByEmailAndNotDeleted(AuthUtils.getUserCurrent())
@@ -101,7 +101,7 @@ public class FavoriteServiceImpl implements IFavoriteService {
     var favorites = favoriteRepository.findByUserIdAndDeletedAtIsNull(user.getId(), pageable);
     List<FavoriteUserResponse> responses =
         favorites.stream().map(mapper::favoriteEntityToDto).toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<FavoriteUserResponse>>builder()
         .message("Get favorite successfully")
         .result(responses)
         .totalPages(favorites.getTotalPages())
@@ -112,7 +112,8 @@ public class FavoriteServiceImpl implements IFavoriteService {
   }
 
   @Override
-  public ApiResponse<?> getAllFavorite(Pageable pageable, String userName, String productName) {
+  public ApiResponse<List<FavoriteResponse>> getAllFavorite(
+      Pageable pageable, String userName, String productName) {
     var favorites =
         favoriteRepository.findAll(
             ((root, query, criteriaBuilder) -> {
@@ -123,14 +124,14 @@ public class FavoriteServiceImpl implements IFavoriteService {
 
               // Filter by productName if provided
               if (productName != null && !productName.trim().isEmpty()) {
-                var productSearch ="%"+ StringHelper.toSlug(productName) + "%";
+                var productSearch = "%" + StringHelper.toSlug(productName) + "%";
                 var productJoin = root.join("product");
                 predicates.add(criteriaBuilder.like(productJoin.get("slug"), productSearch));
               }
 
               // Filter by userName if provided
               if (userName != null && !userName.trim().isEmpty()) {
-                var userSearch ="%"+ (userName) + "%";
+                var userSearch = "%" + (userName) + "%";
                 var userJoin = root.join("user");
                 predicates.add(criteriaBuilder.like(userJoin.get("name"), userSearch));
               }
@@ -142,7 +143,7 @@ public class FavoriteServiceImpl implements IFavoriteService {
             pageable);
     List<FavoriteResponse> responses =
         favorites.stream().map(mapper::favoriteDtoToFavoriteResponse).toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<FavoriteResponse>>builder()
         .message("Get favorite successfully")
         .result(responses)
         .totalPages(favorites.getTotalPages())
