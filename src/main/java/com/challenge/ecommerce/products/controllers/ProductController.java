@@ -41,7 +41,18 @@ public class ProductController {
 
   @PostMapping
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Create new product successfully",
       content = @Content(schema = @Schema(implementation = ProductResponse.class)))
+  @DeleteMapping("/{productSlug}")
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Category not found\"\n" + "}")))
   public ResponseEntity<?> addProduct(@RequestBody @Valid ProductCreateDto request) {
     var product = productService.addProduct(request);
     var resp =
@@ -71,7 +82,17 @@ public class ProductController {
 
   @GetMapping("/{productSlug}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Get Product Successfully",
       content = @Content(schema = @Schema(implementation = ProductResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Product not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Product not found\"\n" + "}")))
   public ResponseEntity<?> getProductBySlug(@PathVariable String productSlug) {
     String formattedSlug = StringHelper.toSlug(productSlug.trim());
     var product = productService.getProductBySlug(formattedSlug);
@@ -81,7 +102,25 @@ public class ProductController {
 
   @PutMapping("/{productSlug}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Update Product Successfully",
       content = @Content(schema = @Schema(implementation = ProductResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Product not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Product not found\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Category not found\"\n" + "}")))
   public ResponseEntity<?> updateProductBySlug(
       @PathVariable String productSlug, @RequestBody @Valid ProductUpdateDto request) {
     String formattedSlug = StringHelper.toSlug(productSlug.trim());
@@ -92,12 +131,22 @@ public class ProductController {
 
   @DeleteMapping("/{productSlug}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Delete product successfully",
       content =
           @Content(
               schema = @Schema(implementation = ApiResponse.class),
               examples =
                   @ExampleObject(
                       value = "{\n" + "  \"message\": \"Delete product successfully\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Product not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Product not found\"\n" + "}")))
   public ResponseEntity<?> deleteProductBySlug(@PathVariable String productSlug) {
     String formattedSlug = StringHelper.toSlug(productSlug.trim());
     productService.deleteProductBySlug(formattedSlug);
