@@ -69,6 +69,14 @@ public class OptionController {
               schema = @Schema(implementation = ApiResponse.class),
               examples =
                   @ExampleObject(value = "{\n" + "  \"message\": \"Invalid input\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Option not found\"\n" + "}")))
   public ResponseEntity<?> addOptionValue(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionValueCreateDto request) {
     var optionValue = optionValueService.addOptionValue(optionId, request);
@@ -99,6 +107,14 @@ public class OptionController {
       responseCode = "200",
       description = "Update option Successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Option not found\"\n" + "}")))
   public ResponseEntity<?> updateOption(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionUpdateDto request) {
     var option = optionService.updateOption(request, optionId);
@@ -111,6 +127,14 @@ public class OptionController {
       responseCode = "200",
       description = "Update option value successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Option not found\"\n" + "}")))
   public ResponseEntity<?> updateOptionValue(
       @PathVariable("optionValueId") String optionValueId,
       @RequestBody @Valid OptionValueUpdateDto request) {
@@ -128,6 +152,14 @@ public class OptionController {
       responseCode = "200",
       description = "Get option successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Option not found\"\n" + "}")))
   public ResponseEntity<?> getOption(@PathVariable("optionId") String optionId) {
     var option = optionService.getOptionById(optionId);
     var resp = ApiResponse.builder().result(option).message("Get option successfully").build();
@@ -139,6 +171,15 @@ public class OptionController {
       responseCode = "200",
       description = "Get option value successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option value not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value = "{\n" + "  \"message\": \"Option value not found\"\n" + "}")))
   public ResponseEntity<?> getOptionValue(@PathVariable("optionValueId") String optionValueId) {
     var optionValue = optionValueService.getOptionValue(optionValueId);
     var resp =
@@ -156,6 +197,14 @@ public class OptionController {
               examples =
                   @ExampleObject(
                       value = "{\n" + "  \"message\": \"Delete option successfully\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Option not found\"\n" + "}")))
   public ResponseEntity<?> deleteOption(@PathVariable("optionId") String optionId) {
     optionService.deleteOption(optionId);
     var resp = ApiResponse.builder().message("Delete option successfully").build();
@@ -173,6 +222,15 @@ public class OptionController {
                   @ExampleObject(
                       value =
                           "{\n" + "  \"message\": \"Delete option value successfully\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Option value not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value = "{\n" + "  \"message\": \"Option value not found\"\n" + "}")))
   public ResponseEntity<?> deleteOptionValue(@PathVariable("optionValueId") String optionValueId) {
     optionValueService.deleteOptionValue(optionValueId);
     var resp = ApiResponse.builder().message("Delete option value successfully").build();

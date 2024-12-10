@@ -50,6 +50,15 @@ public class CategoryController {
               schema = @Schema(implementation = ApiResponse.class),
               examples =
                   @ExampleObject(value = "{\n" + "  \"message\": \"Invalid input\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category parent not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(
+                      value = "{\n" + "  \"message\": \"Category parent not found\"\n" + "}")))
   public ResponseEntity<?> addCategory(@RequestBody @Valid CategoryCreateDto request) {
     var category = categoryService.addCategory(request);
     var resp =
@@ -76,6 +85,14 @@ public class CategoryController {
       responseCode = "200",
       description = "Get category successfully",
       content = @Content(schema = @Schema(implementation = CategoryResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Category not found\"\n" + "}")))
   public ResponseEntity<?> getCategoryBySlug(@PathVariable("categorySlug") String categorySlug) {
     String formattedSlug = StringHelper.toSlug(categorySlug);
     var category = categoryService.getCategoryBySlug(formattedSlug);
@@ -88,6 +105,14 @@ public class CategoryController {
       responseCode = "200",
       description = "Update category Successfully",
       content = @Content(schema = @Schema(implementation = CategoryResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Category not found\"\n" + "}")))
   public ResponseEntity<?> updateCategory(
       @PathVariable("categorySlug") String categorySlug,
       @RequestBody @Valid CategoryUpdateDto request) {
@@ -108,6 +133,14 @@ public class CategoryController {
               examples =
                   @ExampleObject(
                       value = "{\n" + "  \"message\": \"Category deleted successfully\"\n" + "}")))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "404",
+      description = "Category not found",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Category not found\"\n" + "}")))
   public ResponseEntity<?> deleteCategory(@PathVariable("categorySlug") String categorySlug) {
     String formattedSlug = StringHelper.toSlug(categorySlug);
     categoryService.deleteCategory(formattedSlug);
