@@ -39,7 +39,17 @@ public class CategoryController {
 
   @PostMapping
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Create new category successfully",
       content = @Content(schema = @Schema(implementation = CategoryResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "400",
+      description = "Invalid input",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Invalid input\"\n" + "}")))
   public ResponseEntity<?> addCategory(@RequestBody @Valid CategoryCreateDto request) {
     var category = categoryService.addCategory(request);
     var resp =
@@ -63,6 +73,8 @@ public class CategoryController {
 
   @GetMapping(value = {"/{categorySlug}"})
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Get category successfully",
       content = @Content(schema = @Schema(implementation = CategoryResponse.class)))
   public ResponseEntity<?> getCategoryBySlug(@PathVariable("categorySlug") String categorySlug) {
     String formattedSlug = StringHelper.toSlug(categorySlug);
@@ -73,6 +85,8 @@ public class CategoryController {
 
   @PutMapping("/{categorySlug}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Update category Successfully",
       content = @Content(schema = @Schema(implementation = CategoryResponse.class)))
   public ResponseEntity<?> updateCategory(
       @PathVariable("categorySlug") String categorySlug,
@@ -86,6 +100,8 @@ public class CategoryController {
 
   @DeleteMapping("/{categorySlug}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Category deleted successfully",
       content =
           @Content(
               schema = @Schema(implementation = ApiResponse.class),

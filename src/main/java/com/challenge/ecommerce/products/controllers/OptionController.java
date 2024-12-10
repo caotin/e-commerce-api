@@ -38,7 +38,17 @@ public class OptionController {
 
   @PostMapping
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Create new option successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "400",
+      description = "Invalid input",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Invalid input\"\n" + "}")))
   public ResponseEntity<?> addOption(@RequestBody @Valid OptionCreateDto request) {
     var option = optionService.addOption(request);
     var resp =
@@ -48,12 +58,25 @@ public class OptionController {
 
   @PostMapping("/values/{optionId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Create new option value successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "400",
+      description = "Invalid input",
+      content =
+          @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples =
+                  @ExampleObject(value = "{\n" + "  \"message\": \"Invalid input\"\n" + "}")))
   public ResponseEntity<?> addOptionValue(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionValueCreateDto request) {
     var optionValue = optionValueService.addOptionValue(optionId, request);
     var resp =
-        ApiResponse.builder().result(optionValue).message("Create new option successfully").build();
+        ApiResponse.builder()
+            .result(optionValue)
+            .message("Create new option value successfully")
+            .build();
     return ResponseEntity.ok(resp);
   }
 
@@ -73,6 +96,8 @@ public class OptionController {
 
   @PutMapping("/{optionId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Update option Successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> updateOption(
       @PathVariable("optionId") String optionId, @RequestBody @Valid OptionUpdateDto request) {
@@ -83,6 +108,8 @@ public class OptionController {
 
   @PutMapping("/values/{optionValueId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Update option value successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> updateOptionValue(
       @PathVariable("optionValueId") String optionValueId,
@@ -98,6 +125,8 @@ public class OptionController {
 
   @GetMapping("/{optionId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Get option successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> getOption(@PathVariable("optionId") String optionId) {
     var option = optionService.getOptionById(optionId);
@@ -107,6 +136,8 @@ public class OptionController {
 
   @GetMapping("/values/{optionValueId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Get option value successfully",
       content = @Content(schema = @Schema(implementation = OptionResponse.class)))
   public ResponseEntity<?> getOptionValue(@PathVariable("optionValueId") String optionValueId) {
     var optionValue = optionValueService.getOptionValue(optionValueId);
@@ -117,6 +148,8 @@ public class OptionController {
 
   @DeleteMapping("/{optionId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Delete option successfully",
       content =
           @Content(
               schema = @Schema(implementation = ApiResponse.class),
@@ -131,6 +164,8 @@ public class OptionController {
 
   @DeleteMapping("/values/{optionValueId}")
   @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      description = "Delete option value successfully",
       content =
           @Content(
               schema = @Schema(implementation = ApiResponse.class),
