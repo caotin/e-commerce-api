@@ -60,7 +60,7 @@ public class CategoryServiceImpl implements ICategoryService {
   }
 
   @Override
-  public ApiResponse<?> getListCategories(Pageable pageable) {
+  public ApiResponse<List<CategoryResponse>> getListCategories(Pageable pageable) {
     var categories = categoryRepository.findAllByDeletedAtIsNull(pageable);
     List<CategoryResponse> categoryResponses =
         categories.stream()
@@ -73,7 +73,7 @@ public class CategoryServiceImpl implements ICategoryService {
                   return resp;
                 })
             .toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<CategoryResponse>>builder()
         .totalPages(categories.getTotalPages())
         .result(categoryResponses)
         .total(categories.getTotalElements())
@@ -153,12 +153,12 @@ public class CategoryServiceImpl implements ICategoryService {
   }
 
   @Override
-  public ApiResponse<?> getListCategoriesByParentSlug(
+  public ApiResponse<List<CategoryResponse>> getListCategoriesByParentSlug(
       Pageable pageable, String categoryParentSlug) {
     var categories = categoryRepository.findByParentSlugAndDeletedAt(categoryParentSlug, pageable);
     List<CategoryResponse> categoryResponses =
         categories.stream().map(mapper::categoryEntityToDto).toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<CategoryResponse>>builder()
         .totalPages(categories.getTotalPages())
         .result(categoryResponses)
         .total(categories.getTotalElements())
