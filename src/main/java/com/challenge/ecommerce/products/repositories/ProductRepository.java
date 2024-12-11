@@ -20,6 +20,9 @@ public interface ProductRepository
   @Query("SELECT b FROM products b WHERE b.slug=:productSlug AND b.deletedAt IS NULL")
   Optional<ProductEntity> findBySlugAndDeletedAtIsNull(@Param("productSlug") String productSlug);
 
+  @Query("SELECT b FROM products b WHERE b.id=:productId AND b.deletedAt IS NULL")
+  Optional<ProductEntity> findByIdAndDeletedAtIsNull(@Param("productId") String productId);
+
   @Query("SELECT b FROM products b WHERE b.category.id=:categoryId AND b.deletedAt IS NULL")
   List<ProductEntity> findByCategoryIdAndDeletedAtIsNull(@Param("categoryId") String categoryId);
 
