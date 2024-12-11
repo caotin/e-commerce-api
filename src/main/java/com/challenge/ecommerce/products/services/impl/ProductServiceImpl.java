@@ -3,6 +3,7 @@ package com.challenge.ecommerce.products.services.impl;
 import com.challenge.ecommerce.categories.repositories.CategoryRepository;
 import com.challenge.ecommerce.exceptionHandlers.CustomRuntimeException;
 import com.challenge.ecommerce.exceptionHandlers.ErrorCode;
+import com.challenge.ecommerce.favorites.repositories.FavoriteRepository;
 import com.challenge.ecommerce.products.controllers.dto.*;
 import com.challenge.ecommerce.products.mappers.*;
 import com.challenge.ecommerce.products.models.*;
@@ -42,6 +43,7 @@ public class ProductServiceImpl implements IProductService {
   IVariantMapper variantMapper;
   IOptionMapper optionMapper;
   IOptionValueMapper optionValueMapper;
+  private final FavoriteRepository favoriteRepository;
 
   @Transactional
   @Override
@@ -246,7 +248,7 @@ public class ProductServiceImpl implements IProductService {
 
   void setTotal(ProductResponse resp, ProductEntity product) {
     // set total favorites
-    var totalFavorites = 0;
+    int totalFavorites = favoriteRepository.findAllFavoriteByProductIdAndDeletedAtIsNull(product.getId());
     resp.setTotalFavorites(totalFavorites);
 
     // set total rates
