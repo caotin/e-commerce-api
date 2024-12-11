@@ -6,6 +6,7 @@ import com.challenge.ecommerce.products.controllers.dto.ProductResponse;
 import com.challenge.ecommerce.products.controllers.dto.ProductUpdateDto;
 import com.challenge.ecommerce.products.models.ProductEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -17,6 +18,7 @@ public interface IProductMapper {
 
   ProductResponse productEntityToDto(ProductEntity entity);
 
+  @Mapping(target = "oldEntity.variants.id", ignore = true)
   ProductEntity updateProductFromDto(
       ProductUpdateDto request, @MappingTarget ProductEntity oldEntity);
 

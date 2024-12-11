@@ -15,7 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VariantCreateDto {
+public class VariantUpdateDto {
+
+  String variantId;
+
   @NotNull(message = "Price must not be null")
   @Positive(message = "Price must be greater than zero")
   BigDecimal price;

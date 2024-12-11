@@ -5,7 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,20 +21,9 @@ public class ProductUpdateDto {
 
   String categoryId;
 
-  @NotNull(message = "Price must not be null")
-  @Positive(message = "Price must be greater than zero")
-  BigDecimal price;
-
-  @NotNull(message = "Stock quantity must not be null")
-  @Min(value = 0, message = "Stock quantity must be non-negative")
-  Integer stock_quantity;
-
-  @NotBlank(message = "SkuId must not be null")
-  String sku_id;
-
-  @NotEmpty(message = "Option list cannot be empty")
+  @NotEmpty(message = "Variant list cannot be empty")
   @Valid
-  List<ProductOptionCreateDto> options = new ArrayList<>();
+  List<VariantUpdateDto> variants = new ArrayList<>();
 
   @NotEmpty(message = "Images list cannot be empty")
   @Valid

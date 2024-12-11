@@ -21,4 +21,7 @@ public interface OptionValueRepository extends JpaRepository<OptionValueEntity, 
 
   @Query("SELECT b FROM option_values b WHERE b.id =:id AND b.deletedAt IS NULL")
   Optional<OptionValueEntity> findByIdAndDeletedAtIsNull(@Param("id") String id);
+
+  @Query("SELECT b FROM option_values b WHERE b.value_name = :valueName AND b.deletedAt IS NULL")
+  Optional<OptionValueEntity> findByValueAndDeletedAtIsNull(@Param("valueName") String valueName);
 }

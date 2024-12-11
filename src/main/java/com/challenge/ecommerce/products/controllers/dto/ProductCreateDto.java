@@ -5,7 +5,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,4 +25,12 @@ public class ProductCreateDto {
 
   @NotBlank(message = "Category Id must not be null")
   String categoryId;
+
+  @NotEmpty(message = "Variant list cannot be empty")
+  @Valid
+  List<VariantCreateDto> variants = new ArrayList<>();
+
+  @NotEmpty(message = "Image list cannot be empty")
+  @Valid
+  List<ProductImageCreateDto> images = new ArrayList<>();
 }
