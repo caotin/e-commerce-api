@@ -31,7 +31,6 @@ public class ProductServiceImpl implements IProductService {
 
   IImageService imageService;
   IVariantService variantService;
-  IProductOptionService productOptionService;
 
   ProductOptionRepository productOptionRepository;
   VariantValueRepository variantValueRepository;
@@ -56,30 +55,35 @@ public class ProductServiceImpl implements IProductService {
     var product = mapper.productCreateDtoToEntity(request);
     product.setCategory(category);
 
-    var title = StringHelper.changeFirstCharacterCase(request.getTitle());
+    var title = StringHelper.changeFirstCharacterCase(request.getTitle().trim().strip());
+    log.info("Title: {}", title);
     if (productRepository.existsByTitleAndDeletedAtIsNull(title)) {
       throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
     }
     // set slug
-    var slug = StringHelper.toSlug(request.getTitle());
+    var slug = StringHelper.toSlug(request.getTitle().trim());
     product.setSlug(slug);
     product.setTitle(title);
+
+    log.info("Title product: {}", product.getTitle());
     productRepository.save(product);
-    var resp = mapper.productEntityToDto(product);
-    resp.getCategory().setProductStock(getTotalStock(category.getId()));
-    if (resp.getCategory().getChildCategories() != null) {
-      resp.getCategory()
-          .getChildCategories()
-          .forEach(
-              childCategory -> {
-                childCategory.setProductStock(getTotalStock(childCategory.getId()));
-              });
+    product.setVariants(new HashSet<>());
+
+    // update variants
+    variantService.addProductVariant(request, product);
+
+    // update image
+    if (request.getImages() != null) {
+      imageService.updateImage(request.getImages(), product);
     }
+
+    var resp = mapper.productEntityToDto(product);
+    setAdditionalProduct(resp, product);
     return resp;
   }
 
   @Override
-  public ApiResponse<?> getListProducts(
+  public ApiResponse<List<ProductResponse>> getListProducts(
       Pageable pageable, String category, Integer minPrice, Integer maxPrice) {
     var products =
         productRepository.findAll(
@@ -116,25 +120,11 @@ public class ProductServiceImpl implements IProductService {
             .map(
                 product -> {
                   var response = mapper.productEntityToDto(product);
-                  setListImage(response, product);
-                  setListVariant(response, product);
-                  setTotal(response, product);
-                  response
-                      .getCategory()
-                      .setProductStock(getTotalStock(product.getCategory().getId()));
-                  if (response.getCategory().getChildCategories() != null) {
-                    response
-                        .getCategory()
-                        .getChildCategories()
-                        .forEach(
-                            childCategory -> {
-                              childCategory.setProductStock(getTotalStock(childCategory.getId()));
-                            });
-                  }
+                  setAdditionalProduct(response, product);
                   return response;
                 })
             .toList();
-    return ApiResponse.builder()
+    return ApiResponse.<List<ProductResponse>>builder()
         .totalPages(products.getTotalPages())
         .result(productResponses)
         .total(products.getTotalElements())
@@ -151,21 +141,11 @@ public class ProductServiceImpl implements IProductService {
             .findBySlugAndDeletedAtIsNull(productSlug)
             .orElseThrow(() -> new CustomRuntimeException(ErrorCode.PRODUCT_NOT_FOUND));
     var resp = mapper.productEntityToDto(product);
-    setListVariant(resp, product);
-    setListImage(resp, product);
-    resp.getCategory().setProductStock(getTotalStock(product.getCategory().getId()));
-    if (resp.getCategory().getChildCategories() != null) {
-      resp.getCategory()
-          .getChildCategories()
-          .forEach(
-              childCategory -> {
-                childCategory.setProductStock(getTotalStock(childCategory.getId()));
-              });
-    }
-    setTotal(resp, product);
+    setAdditionalProduct(resp, product);
     return resp;
   }
 
+  @Transactional
   @Override
   public ProductResponse updateProductBySlug(ProductUpdateDto request, String productSlug) {
     var oldProduct =
@@ -186,13 +166,15 @@ public class ProductServiceImpl implements IProductService {
     var description =
         request.getDescription() == null ? oldProduct.getDescription() : request.getDescription();
     var title = request.getTitle() == null ? oldProduct.getTitle() : request.getTitle();
-    var newTitle = StringHelper.changeFirstCharacterCase(title);
+    var newTitle = StringHelper.changeFirstCharacterCase(title.trim().strip());
+
     if (productRepository.existsByTitleAndDeletedAtIsNull(newTitle)
-        && !oldProduct.getTitle().equals(newTitle)) {
+        && !oldProduct.getTitle().trim().equals(newTitle)) {
       throw new CustomRuntimeException(ErrorCode.PRODUCT_NAME_EXISTED);
     }
     newProduct.setTitle(newTitle);
-    newProduct.setSlug(StringHelper.toSlug(newTitle));
+    newProduct.setSlug(StringHelper.toSlug(newTitle.trim()));
+
     if (description.isBlank()) {
       throw new CustomRuntimeException(ErrorCode.DESCRIPTION_CANNOT_BE_NULL);
     }
@@ -202,30 +184,16 @@ public class ProductServiceImpl implements IProductService {
     if (request.getImages() != null) {
       imageService.updateImage(request.getImages(), newProduct);
     }
-    // update variants
-    var variant = variantService.addProductVariant(request, newProduct);
 
-    // set option and option value
-    productOptionService.updateProductOptionAndOptionValues(request, newProduct, variant);
+    // update variants
+    variantService.updateProductVariant(request, newProduct);
 
     productRepository.save(newProduct);
-    var resp = mapper.productEntityToDto(newProduct);
-    setTotal(resp, newProduct);
-    setListImage(resp, newProduct);
 
-    // set variant
-    setListVariant(resp, newProduct);
-    // set product stock
-    resp.getCategory().setProductStock(getTotalStock(newProduct.getCategory().getId()));
-    if (resp.getCategory().getChildCategories() != null) {
-      resp.getCategory()
-          .getChildCategories()
-          .forEach(
-              childCategory -> {
-                childCategory.setProductStock(getTotalStock(childCategory.getId()));
-              });
-    }
-    // set review
+    var resp = mapper.productEntityToDto(newProduct);
+    log.info("test 1");
+    log.info("product variant size {}", newProduct.getVariants().size());
+    setAdditionalProduct(resp, newProduct);
     return resp;
   }
 
@@ -247,7 +215,9 @@ public class ProductServiceImpl implements IProductService {
     for (var product : products) {
       if (product.getVariants() != null && !product.getVariants().isEmpty()) {
         for (var variant : product.getVariants()) {
-          productStock += variant.getStock_quantity();
+          if (variant.getId() != null) {
+            productStock += variant.getStock_quantity();
+          }
         }
       }
     }
@@ -326,12 +296,35 @@ public class ProductServiceImpl implements IProductService {
           product.getVariants().stream()
               .map(
                   variant -> {
-                    var variantResponse = variantMapper.variantEntityToShortDto(variant);
-                    setListProductOption(variantResponse, product);
-                    return variantResponse;
+                    if (variant.getDeletedAt() == null) {
+                      var variantResponse = variantMapper.variantEntityToShortDto(variant);
+                      setListProductOption(variantResponse, product);
+                      return variantResponse;
+                    }
+                    return null;
                   })
+              .filter(Objects::nonNull)
               .toList();
       resp.setVariants(variants);
     }
+  }
+
+  void setAdditionalProduct(ProductResponse resp, ProductEntity product) {
+    setTotal(resp, product);
+    setListImage(resp, product);
+
+    // set variant
+    setListVariant(resp, product);
+    // set product stock
+    resp.getCategory().setProductStock(getTotalStock(product.getCategory().getId()));
+    if (resp.getCategory().getChildCategories() != null) {
+      resp.getCategory()
+          .getChildCategories()
+          .forEach(
+              childCategory -> {
+                childCategory.setProductStock(getTotalStock(childCategory.getId()));
+              });
+    }
+    // set review
   }
 }
